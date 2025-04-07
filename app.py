@@ -47,9 +47,9 @@ def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25'): # Using a stable 
         return None
 
     # If multiple keys, choose one randomly; otherwise use the configured one (if single) or the first.
-    selected_key = random.choice(GEMINI_API_KEYS) if len(GEMINI_API_KEYS) > 1 else GEMINI_API_KEYS[0]
+    selected_key = random.choice(GEMINI_API_KEYS)
 
-    client = genai.Client(api_key=random.choice(selected_key))
+    client = genai.Client(api_key=selected_key)
 
 
     try:
