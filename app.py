@@ -252,13 +252,12 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 # --- Streamlit App UI ---
 st.set_page_config(layout="wide")
 
-st.title("☁️ Facebook Ads Library Multi-Term Scraper (Cloud Ready)")
+st.title("☁️ Facebook Ads Library Multi-Term Scraper ")
 
 st.markdown("""
 Provide a **Base URL Template** and a list of **Search Terms** (one per line).
 The scraper will run **in the cloud**, iterate through each term, scrape ads, and combine results.
 
-**Disclaimer:** Web scraping is fragile. Facebook updates WILL break this scraper. Performance on Streamlit Cloud depends on resource usage and potential anti-scraping measures by Facebook. Use responsibly.
 """)
 
 # --- Inputs ---
@@ -280,14 +279,13 @@ search_terms_input = st.text_area(
 
 # REMOVED Chromedriver path input
 
-st.info("ℹ️ WebDriver (Chrome & Chromedriver) should be automatically configured in the Streamlit Cloud environment via `packages.txt`.", icon="☁️")
 
 
 col1, col2 = st.columns(2)
 with col1:
     scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=3, max_value=20, value=7, help="Base time between scrolls. Longer times might be needed in cloud.")
 with col2:
-     max_scrolls = st.slider("Max Scroll Attempts:", min_value=5, max_value=75, value=40, help="Max scrolls per term. Keep lower to avoid timeouts.")
+     max_scrolls = st.slider("Max Scroll Attempts:", min_value=1, max_value=75, value=40, help="Max scrolls per term. Keep lower to avoid timeouts.")
 
 
 # --- Execution ---
@@ -351,6 +349,9 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
             overall_status_placeholder.empty()
             overall_duration = time.time() - overall_start_time
+            all_results_dfs = all_results_dfs[(df['text'] != "Not Found") & (df['media_url'] != "Not Found") ]
+            all_results_dfs= all_results_dfs.reset_index(drop=True)
+            
             st.info(f"Completed all {len(search_terms)} terms in {overall_duration:.2f} seconds.")
 
             # --- Combine and Display Results ---
