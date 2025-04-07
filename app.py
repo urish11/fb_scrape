@@ -1,5 +1,5 @@
 import streamlit as st
-from beautifulsoup4 import BeautifulSoup
+from bs4 import BeautifulSoup
 import json
 import requests
 import pandas as pd
