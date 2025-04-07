@@ -16,9 +16,33 @@ import traceback # For detailed error logging
 import io # For CSV download
 import urllib.parse # For URL encoding search terms
 import os # Potentially useful for environment checks
-
+GEMINI_API_KEY =st.secrets.get("GEMINI_API_KEY")
 # --- Core Scraping Logic (adapted for Cloud) ---
 # Removed 'driver_path' argument
+def gemini_text_lib(prompt,model ='gemini-2.5-pro-exp-03-25' ):
+
+
+
+
+    client = genai.Client(api_key=random.choice(GEMINI_API_KEY))
+
+
+    try:
+        response = client.models.generate_content(
+            model=model, contents=  prompt
+        )
+
+        return response.text
+    except Exception as e:
+        st.text('gemini_text_lib error ' + str(e))
+        time.sleep(4)
+        return None
+
+
+
+
+
+
 def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
     """
     Scrapes ads from a given Facebook Ads Library URL using Selenium (Cloud-ready).
@@ -361,7 +385,6 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                 combined_df= combined_df.reset_index(drop=True)
                 st.dataframe(combined_df, use_container_width=True,column_config={ "Media_URL": st.column_config.ImageColumn( "Preview Image") },row_height  = 50)
                 st.success(f"Successfully scraped a total of {len(combined_df)} ads.")
-
                 @st.cache_data
                 def convert_combined_df_to_csv(df):
                    return df.to_csv(index=False).encode('utf-8')
@@ -382,7 +405,11 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             with st.expander("Show detailed log", expanded=False):
                  log_text = "\n".join(all_log_messages)
                  st.text_area("Log Output:", log_text, height=400)
+if st.button("Process trends with gemini?"):
+    gemini_res = gemini_text_lib(f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a CLEAN  list of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic\n\n\n {combined_df["text"]}""")
+    st.text(gemini_res)
 
+    
 # --- Footer ---
 st.markdown("---")
 st.markdown("Cloud-ready app using Streamlit, Selenium, BeautifulSoup, Pandas.")
