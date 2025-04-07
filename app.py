@@ -457,7 +457,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a simple txt CLEAN  list  (no Analysis )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, return in original language
 
                     Ad Text:
-                    {'\n'.join(df_to_process["Text"][:20])}
+                    {'\n'.join(df_to_process["Text"])}
                     
                     
                     """
