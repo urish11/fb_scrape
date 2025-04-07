@@ -461,7 +461,7 @@ Ad Text:
 
 Analysis Result (Top ideas/themes based on recurrence and potential):
 """
-                st.info(f"Sending {sample_size} unique text samples to Gemini for analysis...")
+                st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
                      gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
 
