@@ -357,7 +357,6 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             st.subheader("📊 Combined Scraped Data")
             if all_results_dfs:
                 combined_df = pd.concat(all_results_dfs, ignore_index=True)
-                print(combined_df.to_markdown())
                 combined_df = combined_df[(combined_df['Text'] != "Not Found") & (combined_df['Media_URL'] != "Not Found") ]
                 combined_df= combined_df.reset_index(drop=True)
                 st.dataframe(combined_df, use_container_width=True)
