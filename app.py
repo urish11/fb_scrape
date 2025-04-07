@@ -23,7 +23,6 @@ st.set_page_config(layout="wide")
 
 # --- Gemini Import and Configuration ---
 try:
-    import google.generativeai as genai # Added import
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
     api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
     if api_keys_str:
