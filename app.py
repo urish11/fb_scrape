@@ -49,34 +49,21 @@ def gemini_text_lib(prompt, model='gemini-1.5-pro-latest'): # Using a stable mod
     # If multiple keys, choose one randomly; otherwise use the configured one (if single) or the first.
     selected_key = random.choice(GEMINI_API_KEYS) if len(GEMINI_API_KEYS) > 1 else GEMINI_API_KEYS[0]
 
+    client = genai.Client(api_key=random.choice(selected_key))
+
+
     try:
-        # Initialize client specifically if using random keys frequently,
-        # otherwise rely on genai.configure() if only one key.
-        # For simplicity here, we'll just use the global generate_content
-        # assuming genai.configure was called or the library handles it.
-        # If using random keys consistently: client = genai.Client(api_key=selected_key)
-        # response = client.generate_content(...)
+        response = client.models.generate_content(
+            model=model, contents=  prompt
+        )
 
-        # Using the global method (simpler if genai.configure worked for single key)
-        gemini_model = genai.GenerativeModel(model)
-        response = gemini_model.generate_content(prompt)
-
-        # Accessing response parts safely
-        if hasattr(response, 'text'):
-             return response.text
-        # Fallback for different response structures if needed (check Gemini library docs)
-        elif response.parts:
-             return "".join(part.text for part in response.parts)
-        else:
-             st.warning("Gemini response structure unexpected. No text found.")
-             return None # Or handle differently
-
+        return response.text
     except Exception as e:
-        st.error(f"Gemini API Error: {e}")
-        st.error(f"Attempted using model: {model}")
-        # Consider more specific error handling based on Gemini exceptions if needed
-        # e.g., handle quota errors, content blocking differently.
+        st.text('gemini_text_lib error ' + str(e))
+        time.sleep(4)
         return None
+
+
 
 # --- Initialize Session State ---
 if 'combined_df' not in st.session_state:
