@@ -349,7 +349,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
             overall_status_placeholder.empty()
             overall_duration = time.time() - overall_start_time
-            all_results_dfs = all_results_dfs[(df['text'] != "Not Found") & (df['media_url'] != "Not Found") ]
+            all_results_dfs = all_results_dfs[(all_results_dfs['text'] != "Not Found") & (df['media_url'] != "Not Found") ]
             all_results_dfs= all_results_dfs.reset_index(drop=True)
             
             st.info(f"Completed all {len(search_terms)} terms in {overall_duration:.2f} seconds.")
