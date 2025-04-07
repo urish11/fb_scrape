@@ -359,7 +359,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                 combined_df = pd.concat(all_results_dfs, ignore_index=True)
                 combined_df = combined_df[(combined_df['Text'] != "Not Found") & (combined_df['Media_URL'] != "Not Found") ]
                 combined_df= combined_df.reset_index(drop=True)
-                st.dataframe(combined_df, use_container_width=True)
+                st.dataframe(combined_df, use_container_width=True,column_config={ "apps": st.column_config.ImageColumn( "Preview Image") ))
                 st.success(f"Successfully scraped a total of {len(combined_df)} ads.")
 
                 @st.cache_data
