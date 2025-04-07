@@ -319,7 +319,6 @@ base_url_template = st.text_input(
 )
 search_terms_input = st.text_area(
     "Enter Search Terms (one per line):",
-    "searchlabz.com\nmarketing agency\nseo tools",
     height=150,
     help="Each line is a separate search query."
 )
