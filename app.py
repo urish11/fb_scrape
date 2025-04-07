@@ -456,11 +456,11 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             # Construct the final prompt
             gemini_prompt = f"""Analyze the following Facebook ad texts scraped from competitor searches related to search arbitrage or similar topics. Identify recurring themes, successful patterns, promising ideas, or specific niches mentioned. Focus on identifying potential opportunities based on what seems to be working for competitors (indicated by recurrence). Provide a concise, actionable list of the top potential ideas or themes, ordered by perceived potential (most promising first). Limit the list to a reasonable number (e.g., top 10-20). BE VERY thorough in analyzing EACH distinct idea/theme identified before listing it. Be specific about the topic/niche for each idea.
 
-Ad Text:
-{df_to_process["Text"]}
-
-Analysis Result (Top ideas/themes based on recurrence and potential):
-"""
+                    Ad Text:
+                    {df_to_process["Text"]}
+                    
+                    Analysis Result (Top ideas/themes based on recurrence and potential):
+                    """
                 st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
                      gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
