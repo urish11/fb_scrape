@@ -451,18 +451,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         if "Text" in df_to_process.columns:
             # --- Prepare prompt (consider limits) ---
             # Example: Use unique texts, limit number of texts sent
-            unique_texts = df_to_process["Text"].unique()
-            sample_size = min(len(unique_texts), 200) # Limit sample size for API
-            prompt_text_sample = "\n---\n".join(unique_texts[:sample_size]) # Use separator
+         
+        
+            # Construct the final prompt
+            gemini_prompt = f"""Analyze the following Facebook ad texts scraped from competitor searches related to search arbitrage or similar topics. Identify recurring themes, successful patterns, promising ideas, or specific niches mentioned. Focus on identifying potential opportunities based on what seems to be working for competitors (indicated by recurrence). Provide a concise, actionable list of the top potential ideas or themes, ordered by perceived potential (most promising first). Limit the list to a reasonable number (e.g., top 10-20). BE VERY thorough in analyzing EACH distinct idea/theme identified before listing it. Be specific about the topic/niche for each idea.
 
-            if not prompt_text_sample.strip():
-                 st.warning("Filtered data contains no text content to analyze.")
-            else:
-                # Construct the final prompt
-                gemini_prompt = f"""Analyze the following Facebook ad texts scraped from competitor searches related to search arbitrage or similar topics. Identify recurring themes, successful patterns, promising ideas, or specific niches mentioned. Focus on identifying potential opportunities based on what seems to be working for competitors (indicated by recurrence). Provide a concise, actionable list of the top potential ideas or themes, ordered by perceived potential (most promising first). Limit the list to a reasonable number (e.g., top 10-20). BE VERY thorough in analyzing EACH distinct idea/theme identified before listing it. Be specific about the topic/niche for each idea.
-
-Ad Text Samples:
-{prompt_text_sample}
+Ad Text:
+{df_to_process["Text"]}
 
 Analysis Result (Top ideas/themes based on recurrence and potential):
 """
