@@ -461,16 +461,16 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     
                     Analysis Result (Top ideas/themes based on recurrence and potential):
                     """
-                st.info(f"Sending  unique text samples to Gemini for analysis...")
-                with st.spinner("🧠 Processing with Gemini... This might take a moment."):
-                     gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
+            st.info(f"Sending  unique text samples to Gemini for analysis...")
+            with st.spinner("🧠 Processing with Gemini... This might take a moment."):
+                gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
 
-                if gemini_res:
-                     st.subheader("✨ Gemini Analysis Results")
-                     st.markdown(gemini_res) # Use markdown for better formatting
-                else:
-                     # Error message already displayed within gemini_text_lib
-                     st.error("Gemini processing failed or returned no result.")
+            if gemini_res:
+                st.subheader("✨ Gemini Analysis Results")
+                st.markdown(gemini_res) # Use markdown for better formatting
+            else:
+                # Error message already displayed within gemini_text_lib
+                st.error("Gemini processing failed or returned no result.")
         else:
             st.error("Could not find 'Text' column in the scraped data. Cannot analyze.")
     else:
