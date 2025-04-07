@@ -26,7 +26,7 @@ try:
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
     api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
     if api_keys_str:
-        GEMINI_API_KEYS = [key.strip() for key in api_keys_str.split(',') if key.strip()]
+        GEMINI_API_KEYS = api_keys_str
       
 
     else:
