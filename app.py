@@ -466,7 +466,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
             if gemini_res:
                 st.subheader("✨ Gemini Analysis Results")
-                st.markdown(gemini_res) # Use markdown for better formatting
+                st.text(gemini_res) # Use markdown for better formatting
             else:
                 # Error message already displayed within gemini_text_lib
                 st.error("Gemini processing failed or returned no result.")
