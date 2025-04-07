@@ -349,8 +349,8 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
             overall_status_placeholder.empty()
             overall_duration = time.time() - overall_start_time
-            print(all_results_dfs)
-            all_results_dfs = all_results_dfs[(all_results_dfs['Text'] != "Not Found") & (df['Media_URL'] != "Not Found") ]
+            print(all_results_dfs.to_markdown())
+            all_results_dfs = all_results_dfs[(all_results_dfs['Text'] != "Not Found") & (all_results_dfs['Media_URL'] != "Not Found") ]
             all_results_dfs= all_results_dfs.reset_index(drop=True)
             
             st.info(f"Completed all {len(search_terms)} terms in {overall_duration:.2f} seconds.")
