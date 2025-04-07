@@ -28,22 +28,13 @@ try:
     api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
     if api_keys_str:
         GEMINI_API_KEYS = [key.strip() for key in api_keys_str.split(',') if key.strip()]
-        if not GEMINI_API_KEYS:
-             st.warning("GEMINI_API_KEY secret found but contains no valid keys after splitting by comma.", icon="⚠️")
-             GEMINI_API_KEYS = None
-        else:
-            # Configure the library (optional, but good practice if using only one key)
-             if len(GEMINI_API_KEYS) == 1:
-                 genai.configure(api_key=GEMINI_API_KEYS[0])
-             st.success("Gemini API Keys loaded.", icon="🔑")
+      
 
     else:
         st.warning("GEMINI_API_KEY not found in Streamlit secrets. Gemini functionality will be disabled.", icon="⚠️")
         GEMINI_API_KEYS = None
 
-except ImportError:
-    st.error("`google-generativeai` library not installed. Please add it to requirements.txt")
-    GEMINI_API_KEYS = None
+
 except Exception as e:
     st.error(f"Error initializing Gemini configuration: {e}")
     GEMINI_API_KEYS = None
