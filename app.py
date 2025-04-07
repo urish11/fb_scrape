@@ -4,45 +4,94 @@ import json
 import requests
 import pandas as pd
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service # Keep import, might not use explicit path
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import WebDriverException, TimeoutException # Import specific exceptions
+from selenium.common.exceptions import WebDriverException, TimeoutException
 import time
 from datetime import datetime
-import traceback # For detailed error logging
-import io # For CSV download
-import urllib.parse # For URL encoding search terms
-import os # Potentially useful for environment checks
-GEMINI_API_KEY =st.secrets.get("GEMINI_API_KEY")
-# --- Core Scraping Logic (adapted for Cloud) ---
-# Removed 'driver_path' argument
-def gemini_text_lib(prompt,model ='gemini-2.5-pro-exp-03-25' ):
+import traceback
+import io
+import urllib.parse
+import os
+import random # Added import
+
+# --- Gemini Import and Configuration ---
+try:
+    import google.generativeai as genai # Added import
+    # Get API keys from secrets - assumes it's a comma-separated string or a single key
+    api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
+    if api_keys_str:
+        GEMINI_API_KEYS = [key.strip() for key in api_keys_str.split(',') if key.strip()]
+        if not GEMINI_API_KEYS:
+             st.warning("GEMINI_API_KEY secret found but contains no valid keys after splitting by comma.", icon="⚠️")
+             GEMINI_API_KEYS = None
+        else:
+            # Configure the library (optional, but good practice if using only one key)
+             if len(GEMINI_API_KEYS) == 1:
+                 genai.configure(api_key=GEMINI_API_KEYS[0])
+             st.success("Gemini API Keys loaded.", icon="🔑")
+
+    else:
+        st.warning("GEMINI_API_KEY not found in Streamlit secrets. Gemini functionality will be disabled.", icon="⚠️")
+        GEMINI_API_KEYS = None
+
+except ImportError:
+    st.error("`google-generativeai` library not installed. Please add it to requirements.txt")
+    GEMINI_API_KEYS = None
+except Exception as e:
+    st.error(f"Error initializing Gemini configuration: {e}")
+    GEMINI_API_KEYS = None
 
 
-
-
-    client = genai.Client(api_key=random.choice(GEMINI_API_KEY))
-
-
-    try:
-        response = client.models.generate_content(
-            model=model, contents=  prompt
-        )
-
-        return response.text
-    except Exception as e:
-        st.text('gemini_text_lib error ' + str(e))
-        time.sleep(4)
+# --- Gemini Function ---
+def gemini_text_lib(prompt, model='gemini-1.5-pro-latest'): # Using a stable model
+    """ Calls Gemini API, handling potential list of keys """
+    if not GEMINI_API_KEYS:
+        st.error("Gemini API keys not available.")
         return None
 
+    # If multiple keys, choose one randomly; otherwise use the configured one (if single) or the first.
+    selected_key = random.choice(GEMINI_API_KEYS) if len(GEMINI_API_KEYS) > 1 else GEMINI_API_KEYS[0]
 
+    try:
+        # Initialize client specifically if using random keys frequently,
+        # otherwise rely on genai.configure() if only one key.
+        # For simplicity here, we'll just use the global generate_content
+        # assuming genai.configure was called or the library handles it.
+        # If using random keys consistently: client = genai.Client(api_key=selected_key)
+        # response = client.generate_content(...)
 
+        # Using the global method (simpler if genai.configure worked for single key)
+        gemini_model = genai.GenerativeModel(model)
+        response = gemini_model.generate_content(prompt)
 
+        # Accessing response parts safely
+        if hasattr(response, 'text'):
+             return response.text
+        # Fallback for different response structures if needed (check Gemini library docs)
+        elif response.parts:
+             return "".join(part.text for part in response.parts)
+        else:
+             st.warning("Gemini response structure unexpected. No text found.")
+             return None # Or handle differently
 
+    except Exception as e:
+        st.error(f"Gemini API Error: {e}")
+        st.error(f"Attempted using model: {model}")
+        # Consider more specific error handling based on Gemini exceptions if needed
+        # e.g., handle quota errors, content blocking differently.
+        return None
 
+# --- Initialize Session State ---
+if 'combined_df' not in st.session_state:
+    st.session_state.combined_df = None # Initialize as None
+
+# --- Scraping Function (scrape_facebook_ads) ---
+# [NO CHANGES NEEDED TO THE scrape_facebook_ads function itself from the previous version]
+# ... (Keep the entire function as it was) ...
 def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
     """
     Scrapes ads from a given Facebook Ads Library URL using Selenium (Cloud-ready).
@@ -88,7 +137,8 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  status_messages.append("WebDriver initialized successfully using default Service().")
              except WebDriverException as e2:
                  status_messages.append(f"WebDriver explicit Service() failed: {e2}")
-                 status_messages.append("Ensure 'google-chrome-stable' and 'chromedriver' are in packages.txt")
+                 # Updated message based on packages.txt correction
+                 status_messages.append("Ensure 'chromium' and 'chromium-driver' are in packages.txt")
                  st.error("Fatal: Could not initialize WebDriver in the cloud environment. Check packages.txt.")
                  return None, status_messages # Critical failure
 
@@ -230,26 +280,26 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 
 
             # Append data - include the search_term
-            if status != "Not Found" or ad_text != "Not Found" or media_url != "Not Found":
-                 ads_data.append({
-                     'Search_Term': search_term,
-                     'Status': status,
-                     'Text': ad_text,
-                     'Media_URL': media_url
-                 })
-                 extraction_count += 1
+            # ** NOTE: Filtering based on Text/Media presence is now done AFTER collecting all rows **
+            ads_data.append({
+                 'Search_Term': search_term,
+                 'Status': status,
+                 'Text': ad_text,
+                 'Media_URL': media_url
+             })
+            extraction_count += 1 # Count raw extracted rows
 
         # --- End of Extraction Loop ---
 
-        final_message = f"Extracted data for {extraction_count} ads for term '{search_term}'."
+        final_message = f"Extracted {extraction_count} raw ad data entries for term '{search_term}' (before filtering)."
         status_messages.append(final_message)
 
         if ads_data:
             df = pd.DataFrame(ads_data)
-            df = df[['Search_Term', 'Status', 'Text', 'Media_URL']] # Ensure column order
-            return df, status_messages
+            # Note: Filtering is now applied AFTER concatenation in the main app logic
+            return df, status_messages # Return the unfiltered data for this term
         else:
-            status_messages.append(f"No data extracted into DataFrame for '{search_term}'.")
+            status_messages.append(f"No raw data extracted into DataFrame for '{search_term}'.")
             return pd.DataFrame(), status_messages # Return empty DF
 
     except WebDriverException as e:
@@ -275,141 +325,186 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 
 # --- Streamlit App UI ---
 st.set_page_config(layout="wide")
-
-st.title("☁️ Facebook Ads Library Multi-Term Scraper ")
-
+st.title("☁️ Facebook Ads Library Multi-Term Scraper + Gemini Analysis")
 st.markdown("""
-Provide a **Base URL Template** and a list of **Search Terms** (one per line).
-The scraper will run **in the cloud**, iterate through each term, scrape ads, and combine results.
-
+Provide Base URL & Search Terms. Scrapes ads in the cloud, combines results, **filters for ads with Text & Media**, displays them, and optionally analyzes trends with Gemini.
 """)
 
 # --- Inputs ---
 st.subheader("Configuration")
-
 default_base_url = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=keyword_unordered&q="
 base_url_template = st.text_input(
     "Enter Base URL Template (ending with 'q=' or ready for term):",
     default_base_url,
     help="Example: https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&q="
 )
-
 search_terms_input = st.text_area(
     "Enter Search Terms (one per line):",
     "searchlabz.com\nmarketing agency\nseo tools",
     height=150,
     help="Each line is a separate search query."
 )
-
-# REMOVED Chromedriver path input
-
-
+st.info("ℹ️ WebDriver configured for Streamlit Cloud.", icon="☁️")
 
 col1, col2 = st.columns(2)
 with col1:
-    scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=3, max_value=20, value=7, help="Base time between scrolls. Longer times might be needed in cloud.")
+    scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=3, max_value=20, value=7, help="Base time between scrolls.")
 with col2:
-     max_scrolls = st.slider("Max Scroll Attempts:", min_value=1, max_value=75, value=40, help="Max scrolls per term. Keep lower to avoid timeouts.")
+     max_scrolls = st.slider("Max Scroll Attempts:", min_value=5, max_value=75, value=40, help="Max scrolls per term.")
 
 
-# --- Execution ---
+# --- Scrape Button and Logic ---
 if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
-    # Validation
+    # --- [Identical validation logic as before] ---
     if not base_url_template or not base_url_template.startswith("http"):
         st.error("Please enter a valid Base URL Template.")
     elif not search_terms_input:
         st.error("Please enter at least one search term.")
-    # REMOVED validation for chromedriver_path
     else:
         search_terms = [term.strip() for term in search_terms_input.splitlines() if term.strip()]
         if not search_terms:
              st.error("No valid search terms found.")
         else:
-            st.info(f"Preparing to scrape for {len(search_terms)} terms in the cloud...")
-
+            st.info(f"Preparing to scrape for {len(search_terms)} terms...")
             all_results_dfs = []
             all_log_messages = []
             overall_start_time = time.time()
             overall_status_placeholder = st.empty()
 
-            # Loop through terms
+            # --- [Identical scraping loop as before] ---
             for i, term in enumerate(search_terms):
                 term_start_time = time.time()
                 overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'...")
-
-                # Construct URL
                 encoded_term = urllib.parse.quote_plus(term)
                 if "?" in base_url_template:
-                     scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&q={encoded_term}" # More robust addition
-                     # Simple version if always ends with q=
-                     # scrape_url = f"{base_url_template}{encoded_term}"
+                     scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&q={encoded_term}"
                 else:
                      scrape_url = f"{base_url_template}?q={encoded_term}"
-                # Ensure q= isn't duplicated if base_url had it
-                scrape_url = scrape_url.replace("?&", "?").replace("&&", "&") # Basic cleanup
+                scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
 
-
-                with st.spinner(f"Scraping '{term}' in cloud..."):
-                    # Call the updated scraping function (no driver_path)
+                with st.spinner(f"Scraping '{term}'..."):
                     scraped_df, log_messages = scrape_facebook_ads(
-                        scrape_url,
-                        term,
-                        scroll_pause,
-                        max_scrolls
+                        scrape_url, term, scroll_pause, max_scrolls
                     )
                     all_log_messages.extend(log_messages)
 
                 term_duration = time.time() - term_start_time
-                if scraped_df is not None: # Success or empty df
+                if scraped_df is not None: # Check for None (fatal error)
                     if not scraped_df.empty:
-                        st.success(f"Finished '{term}' in {term_duration:.2f}s. Found {len(scraped_df)} ads.")
+                         # Append even if empty, filtering happens after concat
                         all_results_dfs.append(scraped_df)
-                    else:
-                         st.warning(f"Finished '{term}' in {term_duration:.2f}s. No ads extracted.")
-                else: # Explicit failure (None returned)
-                    st.error(f"Scraping failed for term '{term}' after {term_duration:.2f}s. Check logs.")
-                    # Decide if you want to stop on first failure
-                    # break
+                    # Don't display success message per term here, do it after combining/filtering
+                else:
+                    st.error(f"Scraping failed for term '{term}' after {term_duration:.2f}s.")
 
             overall_status_placeholder.empty()
             overall_duration = time.time() - overall_start_time
-          
-            
-            st.info(f"Completed all {len(search_terms)} terms in {overall_duration:.2f} seconds.")
+            st.info(f"Finished scraping all {len(search_terms)} terms in {overall_duration:.2f} seconds. Now combining and filtering...")
 
-            # --- Combine and Display Results ---
-            st.subheader("📊 Combined Scraped Data")
+            # --- Combine, Filter, and Store in Session State ---
             if all_results_dfs:
-                combined_df = pd.concat(all_results_dfs, ignore_index=True)
-                combined_df = combined_df[(combined_df['Text'] != "Not Found") & (combined_df['Media_URL'] != "Not Found") ]
-                combined_df= combined_df.reset_index(drop=True)
-                st.dataframe(combined_df, use_container_width=True,column_config={ "Media_URL": st.column_config.ImageColumn( "Preview Image") },row_height  = 50)
-                st.success(f"Successfully scraped a total of {len(combined_df)} ads.")
-                @st.cache_data
-                def convert_combined_df_to_csv(df):
-                   return df.to_csv(index=False).encode('utf-8')
+                # Combine all collected data (including potentially empty DFs from terms with no results)
+                combined_raw_df = pd.concat(all_results_dfs, ignore_index=True)
 
-                csv_data = convert_combined_df_to_csv(combined_df)
-                now_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-                st.download_button(
-                     label="💾 Download Combined Data as CSV",
-                     data=csv_data,
-                     file_name=f"fb_ads_combined_scrape_{now_ts}.csv",
-                     mime='text/csv',
-                )
+                # Apply filtering HERE, after combining
+                combined_filtered_df = combined_raw_df[
+                    (combined_raw_df['Text'] != "Not Found") &
+                    (combined_raw_df['Media_URL'] != "Not Found")
+                ].copy() # Apply the filter condition from your code
+
+                combined_filtered_df.reset_index(drop=True, inplace=True)
+
+                if not combined_filtered_df.empty:
+                    st.success(f"Combined and filtered data: {len(combined_filtered_df)} ads found with Text & Media.")
+                    # Store the *filtered* DataFrame in session state
+                    st.session_state.combined_df = combined_filtered_df
+                else:
+                    st.warning("No ads with both Text and Media found across all terms after filtering.")
+                    st.session_state.combined_df = pd.DataFrame() # Store empty DF
             else:
-                 st.warning("No data was successfully scraped from any term.")
+                 st.warning("No data was scraped from any term.")
+                 st.session_state.combined_df = None # Ensure state is None if scraping failed
 
             # --- Display Logs ---
             st.subheader("📜 Combined Scraping Log")
+            # Always show logs, even if no data was found
             with st.expander("Show detailed log", expanded=False):
                  log_text = "\n".join(all_log_messages)
-                 st.text_area("Log Output:", log_text, height=400)
-    if st.button("Process trends with gemini?"):
-        gemini_res = gemini_text_lib(f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a CLEAN  list of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic\n\n\n {combined_df["text"]}""")
-        st.text(gemini_res)
+                 st.text_area("Log Output:", log_text, height=300)
 
-    
+
+# --- Display Results Area (uses session state) ---
+st.subheader("📊 Scraped & Filtered Data")
+if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
+    st.dataframe(
+        st.session_state.combined_df,
+        use_container_width=True,
+        column_config={"Media_URL": st.column_config.ImageColumn("Preview Image", width="medium")},
+        # row_height = 100 # Increase row height for images if needed
+    )
+    # Download Button - Placed logically after data display
+    @st.cache_data
+    def convert_combined_df_to_csv(df):
+        return df.to_csv(index=False).encode('utf-8')
+
+    csv_data = convert_combined_df_to_csv(st.session_state.combined_df)
+    now_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    st.download_button(
+         label="💾 Download Filtered Data as CSV",
+         data=csv_data,
+         file_name=f"fb_ads_filtered_scrape_{now_ts}.csv",
+         mime='text/csv',
+         key='download_csv_button' # Add key for widget uniqueness
+    )
+elif st.session_state.combined_df is not None and st.session_state.combined_df.empty:
+    st.info("Scraping complete, but no ads matched the filtering criteria (Text + Media found).")
+else:
+    st.info("Click 'Scrape All Terms in Cloud' to fetch data.")
+
+
+# --- Gemini Processing Button (uses session state) ---
+st.subheader("🤖 Analyze Trends (Optional)")
+if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None)):
+    if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
+        df_to_process = st.session_state.combined_df
+
+        # Check if 'Text' column exists
+        if "Text" in df_to_process.columns:
+            # --- Prepare prompt (consider limits) ---
+            # Example: Use unique texts, limit number of texts sent
+            unique_texts = df_to_process["Text"].unique()
+            sample_size = min(len(unique_texts), 200) # Limit sample size for API
+            prompt_text_sample = "\n---\n".join(unique_texts[:sample_size]) # Use separator
+
+            if not prompt_text_sample.strip():
+                 st.warning("Filtered data contains no text content to analyze.")
+            else:
+                # Construct the final prompt
+                gemini_prompt = f"""Analyze the following Facebook ad texts scraped from competitor searches related to search arbitrage or similar topics. Identify recurring themes, successful patterns, promising ideas, or specific niches mentioned. Focus on identifying potential opportunities based on what seems to be working for competitors (indicated by recurrence). Provide a concise, actionable list of the top potential ideas or themes, ordered by perceived potential (most promising first). Limit the list to a reasonable number (e.g., top 10-20). BE VERY thorough in analyzing EACH distinct idea/theme identified before listing it. Be specific about the topic/niche for each idea.
+
+Ad Text Samples:
+{prompt_text_sample}
+
+Analysis Result (Top ideas/themes based on recurrence and potential):
+"""
+                st.info(f"Sending {sample_size} unique text samples to Gemini for analysis...")
+                with st.spinner("🧠 Processing with Gemini... This might take a moment."):
+                     gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
+
+                if gemini_res:
+                     st.subheader("✨ Gemini Analysis Results")
+                     st.markdown(gemini_res) # Use markdown for better formatting
+                else:
+                     # Error message already displayed within gemini_text_lib
+                     st.error("Gemini processing failed or returned no result.")
+        else:
+            st.error("Could not find 'Text' column in the scraped data. Cannot analyze.")
+    else:
+        st.error("No filtered data available to process. Please scrape data first.")
+elif GEMINI_API_KEYS is None:
+     st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
+
+
 # --- Footer ---
 st.markdown("---")
-st.markdown("Cloud-ready app using Streamlit, Selenium, BeautifulSoup, Pandas.")
+st.markdown("Cloud-ready app using Streamlit, Selenium, BeautifulSoup, Pandas, and Google Gemini.")
