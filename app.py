@@ -449,18 +449,17 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
-            st.text('\n'.join(df_to_process["Text"]))
             # --- Prepare prompt (consider limits) ---
             # Example: Use unique texts, limit number of texts sent
          
         
             # Construct the final prompt
-            gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a CLEAN  list of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic.
+            gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a simple txt CLEAN  list  (no Analysis )of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, return in original language
 
                     Ad Text:
                     {'\n'.join(df_to_process["Text"])}
                     
-                    Analysis Result (Top ideas/themes based on recurrence and potential):
+                    
                     """
             st.info(f"Sending  unique text samples to Gemini for analysis...")
             with st.spinner("🧠 Processing with Gemini... This might take a moment."):
