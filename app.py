@@ -349,9 +349,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
             overall_status_placeholder.empty()
             overall_duration = time.time() - overall_start_time
-            print(all_results_dfs.to_markdown())
-            all_results_dfs = all_results_dfs[(all_results_dfs['Text'] != "Not Found") & (all_results_dfs['Media_URL'] != "Not Found") ]
-            all_results_dfs= all_results_dfs.reset_index(drop=True)
+          
             
             st.info(f"Completed all {len(search_terms)} terms in {overall_duration:.2f} seconds.")
 
@@ -359,6 +357,9 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             st.subheader("📊 Combined Scraped Data")
             if all_results_dfs:
                 combined_df = pd.concat(all_results_dfs, ignore_index=True)
+                print(combined_df.to_markdown())
+                combined_df = combined_df[(combined_df['Text'] != "Not Found") & (combined_df['Media_URL'] != "Not Found") ]
+                combined_df= combined_df.reset_index(drop=True)
                 st.dataframe(combined_df, use_container_width=True)
                 st.success(f"Successfully scraped a total of {len(combined_df)} ads.")
 
