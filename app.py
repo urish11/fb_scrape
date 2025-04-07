@@ -405,9 +405,9 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             with st.expander("Show detailed log", expanded=False):
                  log_text = "\n".join(all_log_messages)
                  st.text_area("Log Output:", log_text, height=400)
-if st.button("Process trends with gemini?"):
-    gemini_res = gemini_text_lib(f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a CLEAN  list of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic\n\n\n {combined_df["text"]}""")
-    st.text(gemini_res)
+    if st.button("Process trends with gemini?"):
+        gemini_res = gemini_text_lib(f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a CLEAN  list of the ideas (just the ideas consicly, no explaning), descending order by potential like i described. Top 100\nanalyze EACH entry!  BE VERY thorough. be  specific in the topic\n\n\n {combined_df["text"]}""")
+        st.text(gemini_res)
 
     
 # --- Footer ---
