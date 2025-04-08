@@ -262,18 +262,30 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 
 
             except Exception: pass
+            # --- Extract Ad Link using CSS Selectors ---
+            ad_link = "Not Found"
+            found_link_tag = None
+            # Define potential CSS selectors for the link, ordered from most specific/reliable to more general
+            link_selectors = [
+                'a[href^="https://l.facebook.com/l.php?u="]', # Starts with FB redirect + contains domain
+                'div._7jyr + a[target="_blank"]', # Positional selector + target attribute
+                'a[data-lynx-mode="hover"]',       # Just the data attribute
+                'a[href^="https://l.facebook.com/l.php?u="]' # Just the FB redirect start
+            ]
 
-
-            try: #extract landing page link
-
-                landing_page = "Not Found"
-
-                landing_page = soup.find_all( 'a', href=lambda href: href and href.startswith('https://l.facebook.com/l.php?u=') )
-                print(landing_page)
-
-
-            except Exception as e: print(e)
-
+            try:
+                for selector in link_selectors:
+                    # print(f"Trying selector: {selector}") # Optional debug print
+                    elem = ad_block.select_one(selector)
+                    # Check if an element was found and if it has an 'href' attribute
+                    if elem and elem.has_attr('href'):
+                        # print(f"Selector matched: {selector}") # Optional debug print
+                        found_link_tag = elem
+                        ad_link = found_link_tag['href'] # Extract the href value
+                        break # Stop searching once a link is found
+            except Exception as e:
+                print(f"An error occurred while selecting the link: {e}")
+                ad_link = "Error finding link"
             # --- [END OF EXTRACTION CODE] ---
 
 
@@ -284,7 +296,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  'Status': status,
                  'Text': ad_text,
                  'Media_URL': media_url,
-                 'Landing_Page': landing_page
+                 'Landing_Page': ad_link
              })
             extraction_count += 1 # Count raw extracted rows
 
