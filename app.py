@@ -272,7 +272,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                 print(landing_page)
 
 
-            except Exception: pass
+            except Exception as e: print(e)
 
             # --- [END OF EXTRACTION CODE] ---
 
