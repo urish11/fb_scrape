@@ -255,7 +255,24 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                          if vid_elem and vid_elem.has_attr('poster'):
                             media_url = vid_elem['poster']
                             break
+
+
+
+                
+
+
             except Exception: pass
+
+
+            try: #extract landing page link
+
+                landing_page = "Not Found"
+
+                landing_page = soup.find_all( 'a', href=lambda href: href and href.startswith('https://l.facebook.com/l.php?u=') )
+
+
+            except Exception: pass
+
             # --- [END OF EXTRACTION CODE] ---
 
 
@@ -265,7 +282,8 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  'Search_Term': search_term,
                  'Status': status,
                  'Text': ad_text,
-                 'Media_URL': media_url
+                 'Media_URL': media_url,
+                 'Landing_Page': landing_page
              })
             extraction_count += 1 # Count raw extracted rows
 
