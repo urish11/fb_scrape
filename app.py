@@ -142,7 +142,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                 time.sleep(0.5) # Short pause between scrolls
                 driver.execute_script(f"window.scrollTo(0, document.body.scrollHeight);") # Try to ensure bottom
                 scroll_count += 1
-                wait_time = scroll_pause_time + (scroll_count * 0.5) # Dynamic wait
+                wait_time = scroll_pause_time + (scroll_count * 0.1) # Dynamic wait
                 scroll_status_placeholder.info(f"Term '{search_term}': Scroll attempt {scroll_count}, waiting {wait_time:.1f}s...")
                 time.sleep(wait_time)
 
@@ -326,7 +326,7 @@ st.info("ℹ️ WebDriver configured for Streamlit Cloud.", icon="☁️")
 
 col1, col2 = st.columns(2)
 with col1:
-    scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=3, max_value=20, value=7, help="Base time between scrolls.")
+    scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=1, max_value=20, value=7, help="Base time between scrolls.")
 with col2:
      max_scrolls = st.slider("Max Scroll Attempts:", min_value=1, max_value=75, value=40, help="Max scrolls per term.")
 
