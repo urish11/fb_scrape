@@ -18,7 +18,7 @@ import urllib.parse
 import os
 import random # Added import
 from google import genai
-
+ 
 st.set_page_config(layout="wide")
 
 # --- Gemini Import and Configuration ---
