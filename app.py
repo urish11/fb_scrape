@@ -20,7 +20,7 @@ import random # Added import
 from google import genai
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 # --- Gemini Import and Configuration ---
 try:
