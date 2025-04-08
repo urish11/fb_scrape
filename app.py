@@ -304,7 +304,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 
 
 # --- Streamlit App UI ---
-st.title("☁️ Facebook Ads Library Multi-Term Scraper + Gemini Analysis")
+st.title("Facebook Ads Library Multi-Term Scraper + Gemini Analysis")
 st.markdown("""
 Provide Base URL & Search Terms. Scrapes ads in the cloud, combines results, **filters for ads with Text & Media**, displays them, and optionally analyzes trends with Gemini.
 """)
@@ -404,7 +404,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                  st.session_state.combined_df = None # Ensure state is None if scraping failed
 
             # --- Display Logs ---
-            st.subheader("📜 Combined Scraping Log")
+            st.subheader("Combined Scraping Log")
             # Always show logs, even if no data was found
             with st.expander("Show detailed log", expanded=False):
                  log_text = "\n".join(all_log_messages)
@@ -412,7 +412,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
 
 # --- Display Results Area (uses session state) ---
-st.subheader("📊 Scraped & Filtered Data")
+st.subheader("Scraped & Filtered Data")
 if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
     st.dataframe(
         st.session_state.combined_df,
@@ -441,7 +441,7 @@ else:
 
 
 # --- Gemini Processing Button (uses session state) ---
-st.subheader("🤖 Analyze Trends (Optional)")
+st.subheader(" Analyze Trends (Optional)")
 if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None)):
     if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
         df_to_process = st.session_state.combined_df
@@ -465,7 +465,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
 
             if gemini_res:
-                st.subheader("✨ Gemini Analysis Results")
+                st.subheader(" Gemini Analysis Results")
                 st.text(gemini_res) # Use markdown for better formatting
             else:
                 # Error message already displayed within gemini_text_lib
