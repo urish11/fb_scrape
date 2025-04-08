@@ -18,7 +18,8 @@ import urllib.parse
 import os
 import random # Added import
 from google import genai
- 
+ from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
+
 st.set_page_config(layout="wide")
 
 # --- Gemini Import and Configuration ---
@@ -282,6 +283,28 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                         # print(f"Selector matched: {selector}") # Optional debug print
                         found_link_tag = elem
                         ad_link = found_link_tag['href'] # Extract the href value
+
+
+                        if ad_link and ad_link != "Not Found" and "l.facebook.com/l.php" in ad_link:
+                            try:
+                                parsed_url = urlparse(ad_link)
+                                query_params = parse_qs(parsed_url.query)
+                                
+                                # Check if the 'u' parameter exists
+                                if 'u' in query_params:
+                                    # parse_qs returns a list for each param, get the first value
+                                    encoded_url = query_params['u'][0]
+                                    # Decode the URL
+                                    ad_link = unquote(encoded_url)
+                                else:
+                                    ad_link = "Redirect link found, but 'u' parameter missing."
+                                    
+                            except Exception as e:
+                                print(f"Error parsing or decoding redirect URL: {e}")
+                                actual_destination_url = "Error processing redirect link"
+                        elif ad_link and ad_link != "Not Found":
+                            # If it wasn't a facebook redirect link, the extracted link is the actual one
+                            ad_link = ad_link
                         break # Stop searching once a link is found
             except Exception as e:
                 print(f"An error occurred while selecting the link: {e}")
