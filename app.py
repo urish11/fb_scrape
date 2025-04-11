@@ -502,7 +502,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
-            st.text(df_to_process.loc["Text"].to_json())
+            st.text(df_to_process["Text"].to_json())
             # --- Prepare prompt (consider limits) ---
             # Example: Use unique texts, limit number of texts sent
          
