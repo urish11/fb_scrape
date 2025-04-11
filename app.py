@@ -506,14 +506,21 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             # Example: Use unique texts, limit number of texts sent
          
         
-            # Construct the final prompt
-            gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages and simillar ideas, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language
+            # # Construct the final prompt
+            # gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages and simillar ideas, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language
 
-                    Ad Text:
-                    {'\n'.join(df_to_process["Text"])}
+            #         Ad Text:
+            #         {'\n'.join(df_to_process["Text"])}
                     
                     
-                    """
+            #         """
+            
+
+            gemini_prompt = f"""Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : 1,50} , ....]
+
+        table:
+        {df_to_process.to_json()}
+        
             st.info(f"Sending  unique text samples to Gemini for analysis...")
             with st.spinner("🧠 Processing with Gemini... This might take a moment."):
                 gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
