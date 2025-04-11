@@ -526,8 +526,22 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
 
             if gemini_res:
+                final_df = pd.DataFrame()
                 st.subheader(" Gemini Analysis Results")
-                st.text(gemini_res) # Use markdown for better formatting
+                gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
+                gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
+
+
+                for index, row in gemini_df.iterrows():
+                    idea = row['idea']
+
+                    indices = row['indices']
+                    matching_rows = df_to_process.iloc[indices]
+                    images = "|".join(matching_rows['Media_URL'].tolist())
+
+                    final_df = pd.concat([final_df, images], ignore_index=True)
+
+                st.text(gemini_res) 
             else:
                 # Error message already displayed within gemini_text_lib
                 st.error("Gemini processing failed or returned no result.")
