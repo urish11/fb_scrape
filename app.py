@@ -539,7 +539,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     matching_rows = df_to_process.iloc[indices]
                     images = "|".join(matching_rows['Media_URL'].tolist())
 
-                    final_df = pd.concat([final_df, images], ignore_index=True)
+                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea, "indices": indices, "images": images}])], ignore_index=True)
 
                 st.text(gemini_res) 
                 st.dataframe(final_df)
