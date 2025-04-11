@@ -542,6 +542,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     final_df = pd.concat([final_df, images], ignore_index=True)
 
                 st.text(gemini_res) 
+                st.dataframe(final_df)
             else:
                 # Error message already displayed within gemini_text_lib
                 st.error("Gemini processing failed or returned no result.")
