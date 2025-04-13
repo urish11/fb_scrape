@@ -538,11 +538,29 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     idea = row['idea']
 
                     indices = row['indices']
-                    inx_len = len(list(indices))
+                    hash_urls={}
+                    for idx in indices: #url:times
+                        landing_page = df_to_process.iloc[idx]["Landing_Page"]
+                        if landing_page in hash_urls:
+                            hash_urls[landing_page] += 1
+                        else:
+                            hash_urls[landing_page] = 1
+                    max_seen_url = max(hash_urls, key=hash_urls.get)
+                    
+                    text_urls = {}
+                    for idx in indices: #text:times
+                        text = df_to_process.iloc[idx]["Text"]
+                        if text in text_urls:
+                            text_urls[text] += 1
+                        else:
+                            text_urls[text] = 1
+                    max_seen_text = max(text_urls, key=text_urls.get)
+
+
                     matching_rows = df_to_process.iloc[indices]
                     images = "|".join(matching_rows['Media_URL'].tolist())
 
-                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea, "indices": indices, "images": images, "len" : inx_len}])], ignore_index=True)
+                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea, "indices": indices, "images": images,"max_url" : max_seen_url, "max_text" : max_seen_text}])], ignore_index=True)
 
                 st.text(gemini_res) 
                 st.dataframe(final_df)
