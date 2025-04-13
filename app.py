@@ -19,7 +19,7 @@ import os
 import random # Added import
 from google import genai
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
-
+from langdetect import detect
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 # --- Gemini Import and Configuration ---
@@ -560,8 +560,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                     matching_rows = df_to_process.iloc[indices]
                     images = "|".join(matching_rows['Media_URL'].tolist())
+                    lang= detect(max_seen_text)
 
-                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" : max_seen_text}])], ignore_index=True)
+                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" : max_seen_text}])], ignore_index=True)
 
                 st.text(gemini_res) 
                 st.dataframe(final_df)
