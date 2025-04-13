@@ -7,3 +7,4 @@ requests
 lxml
 openpyxl 
 google-genai
+langdetect
