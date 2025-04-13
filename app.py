@@ -540,7 +540,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     indices = row['indices']
                     inx_len = len(list(indices))
                     hash_urls={}
-                    for idx in indices: #url:times
+                    for idx in list(indices): #url:times
                         landing_page = df_to_process.iloc[idx]["Landing_Page"]
                         if landing_page in hash_urls:
                             hash_urls[landing_page] += 1
