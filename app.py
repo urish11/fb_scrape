@@ -529,6 +529,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 final_df = pd.DataFrame()
                 st.subheader(" Gemini Analysis Results")
                 gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
+                st.text(gemini_res) 
+
                 gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
                 # st.text(gemini_res) 
 
@@ -564,7 +566,6 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                     final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" : max_seen_text}])], ignore_index=True)
 
-                st.text(gemini_res) 
                 st.dataframe(final_df)
             else:
                 # Error message already displayed within gemini_text_lib
