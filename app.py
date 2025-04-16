@@ -504,7 +504,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
             df_appends = []
-            max_rows = 2000
+            max_rows = 50
             dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
 
             for df_idx, df_to_process in enumerate(dfs_splits):
