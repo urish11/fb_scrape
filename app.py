@@ -509,7 +509,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
             for df_idx, df_to_process in enumerate(dfs_splits):
 
-                st.text(f"Proccessing {df_idx+1} df..."})
+                st.markdown(f"Proccessing {df_idx+1} df..."})
                 
                 # --- Prepare prompt (consider limits) ---
                 # Example: Use unique texts, limit number of texts sent
