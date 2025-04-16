@@ -504,7 +504,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
             df_appends = []
-            max_rows = 50
+            max_rows = 2000
             dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
 
             for df_idx, df_to_process in enumerate(dfs_splits):
@@ -577,9 +577,6 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" :                                 max_seen_text}])], ignore_index=True)
                         df_appends.append(final_df)
 
-                    final_merged_df = pd.concat(df_appends)
-                    
-                    st.dataframe(final_merged_df)
                 else:
                     # Error message already displayed within gemini_text_lib
                     st.error("Gemini processing failed or returned no result.")
@@ -589,6 +586,10 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         st.error("No filtered data available to process. Please scrape data first.")
 elif GEMINI_API_KEYS is None:
      st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
+
+final_merged_df = pd.concat(df_appends)
+                
+st.dataframe(final_merged_df)
 
 
 # --- Footer ---
