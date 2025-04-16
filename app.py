@@ -20,6 +20,7 @@ import random # Added import
 from google import genai
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
 from langdetect import detect
+import numpy as np
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 # --- Gemini Import and Configuration ---
@@ -502,74 +503,85 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
-            # --- Prepare prompt (consider limits) ---
-            # Example: Use unique texts, limit number of texts sent
-         
-        
-            # # Construct the final prompt
-            # gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages and simillar ideas, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language
+            df_appends = []
+            max_rows = 50
+            dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
 
-            #         Ad Text:
-            #         {'\n'.join(df_to_process["Text"])}
-                    
-                    
-            #         """
+            for df_idx, df_to_process in enumerate(dfs_splits):
+
+                st.text(f"Proccessing {df_idx+1} df..."})
+                
+                # --- Prepare prompt (consider limits) ---
+                # Example: Use unique texts, limit number of texts sent
+             
             
-
-            gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
-               
-            table:
-            {df_to_process["Text"].to_json()}"""
-        
-            st.info(f"Sending  unique text samples to Gemini for analysis...")
-            with st.spinner("🧠 Processing with Gemini... This might take a moment."):
-                gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
-
-            if gemini_res:
-                final_df = pd.DataFrame()
-                st.subheader(" Gemini Analysis Results")
-                gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
-                st.text(gemini_res) 
-
-                gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
-                # st.text(gemini_res) 
-
-
-
-                for index, row in gemini_df.iterrows():
-                    idea = row['idea']
+                # # Construct the final prompt
+                # gemini_prompt = f"""Please go over the following search arbitrage ideas, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages and simillar ideas, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language
     
-                    indices = row['indices']
-                    inx_len = len(list(indices))
-                    hash_urls={}
-                    for idx in list(indices): #url:times
-                        landing_page = df_to_process.iloc[idx]["Landing_Page"]
-                        if landing_page in hash_urls:
-                            hash_urls[landing_page] += 1
-                        else:
-                            hash_urls[landing_page] = 1
-                    max_seen_url = max(hash_urls, key=hash_urls.get)
+                #         Ad Text:
+                #         {'\n'.join(df_to_process["Text"])}
+                        
+                        
+                #         """
+                
+    
+                gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
+                   
+                table:
+                {df_to_process["Text"].to_json()}"""
+            
+                st.info(f"Sending  unique text samples to Gemini for analysis...")
+                with st.spinner("🧠 Processing with Gemini... This might take a moment."):
+                    gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
+    
+                if gemini_res:
+                    final_df = pd.DataFrame()
+                    st.subheader(" Gemini Analysis Results")
+                    gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
+                    #st.text(gemini_res) 
+    
+                    gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
+                    # st.text(gemini_res) 
+    
+    
+    
+                    for index, row in gemini_df.iterrows():
+                        idea = row['idea']
+        
+                        indices = row['indices']
+                        inx_len = len(list(indices))
+                        hash_urls={}
+                        for idx in list(indices): #url:times
+                            landing_page = df_to_process.iloc[idx]["Landing_Page"]
+                            if landing_page in hash_urls:
+                                hash_urls[landing_page] += 1
+                            else:
+                                hash_urls[landing_page] = 1
+                        max_seen_url = max(hash_urls, key=hash_urls.get)
+                        
+                        text_urls = {}
+                        for idx in list(indices): #text:times
+                            text = df_to_process.iloc[idx]["Text"]
+                            if text in text_urls:
+                                text_urls[text] += 1
+                            else:
+                                text_urls[text] = 1
+                        max_seen_text = max(text_urls, key=text_urls.get)
+    
+    
+                        matching_rows = df_to_process.iloc[indices]
+                        images = "|".join(matching_rows['Media_URL'].tolist())
+                        lang= detect(max_seen_text)
+    
+                        final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" :                                 max_seen_text}])], ignore_index=True)
+                        df_appends.append(final_df)
+
+                    final_merged_df = pd.concat(df_appends)
                     
-                    text_urls = {}
-                    for idx in list(indices): #text:times
-                        text = df_to_process.iloc[idx]["Text"]
-                        if text in text_urls:
-                            text_urls[text] += 1
-                        else:
-                            text_urls[text] = 1
-                    max_seen_text = max(text_urls, key=text_urls.get)
-
-
-                    matching_rows = df_to_process.iloc[indices]
-                    images = "|".join(matching_rows['Media_URL'].tolist())
-                    lang= detect(max_seen_text)
-
-                    final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" : max_seen_text}])], ignore_index=True)
-
-                st.dataframe(final_df)
-            else:
-                # Error message already displayed within gemini_text_lib
-                st.error("Gemini processing failed or returned no result.")
+                    st.dataframe(final_merged_df)
+                else:
+                    # Error message already displayed within gemini_text_lib
+                    st.error("Gemini processing failed or returned no result.")
         else:
             st.error("Could not find 'Text' column in the scraped data. Cannot analyze.")
     else:
