@@ -584,12 +584,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             st.error("Could not find 'Text' column in the scraped data. Cannot analyze.")
     else:
         st.error("No filtered data available to process. Please scrape data first.")
-elif GEMINI_API_KEYS is None:
-     st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
 
-final_merged_df = pd.concat(df_appends)
-                
-st.dataframe(final_merged_df)
+
+    final_merged_df = pd.concat(df_appends)
+                    
+    st.dataframe(final_merged_df)
+elif GEMINI_API_KEYS is None:
+    st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
 
 
 # --- Footer ---
