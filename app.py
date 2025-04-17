@@ -42,7 +42,8 @@ except Exception as e:
 
 
 # --- Gemini Function ---
-def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25'): # Using a stable model
+def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21'): # Using a stable model
+    st.text(f"Gemini working.. {model}")
     """ Calls Gemini API, handling potential list of keys """
     if not GEMINI_API_KEYS:
         st.error("Gemini API keys not available.")
