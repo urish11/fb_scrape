@@ -65,7 +65,7 @@ def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21',max_retr
     
             return response.text
         except Exception as e:
-            st.text('gemini_text_lib error ' + str(e))
+            st.text('gemini_text_lib error ' + str(e)) 
             time.sleep(15)
             tries += 1
     
