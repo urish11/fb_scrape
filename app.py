@@ -574,7 +574,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         images = "|".join(matching_rows['Media_URL'].tolist())
                         try:
                             lang= detect(max_seen_text)
-                        else:
+                        except:
                             lang=''
     
                         final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" :                                 max_seen_text}])], ignore_index=True)
