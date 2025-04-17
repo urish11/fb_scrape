@@ -542,13 +542,14 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
     
                 if gemini_res:
+                    st.text(gemini_res) 
+
                     final_df = pd.DataFrame()
                     st.subheader(" Gemini Analysis Results")
                     gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
                     #st.text(gemini_res) 
     
                     gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
-                    st.text(gemini_res) 
     
     
     
