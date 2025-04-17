@@ -45,7 +45,8 @@ except Exception as e:
 def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21',max_retries=5): # Using a stable model
     tries = 0
     while tries < max_retries:
-        st.text(f"Gemini working.. {model}")
+        
+        st.text(f"Gemini working.. {model} trial {tries+1}")
         """ Calls Gemini API, handling potential list of keys """
         if not GEMINI_API_KEYS:
             st.error("Gemini API keys not available.")
