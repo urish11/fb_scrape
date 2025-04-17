@@ -42,29 +42,33 @@ except Exception as e:
 
 
 # --- Gemini Function ---
-def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21'): # Using a stable model
-    st.text(f"Gemini working.. {model}")
-    """ Calls Gemini API, handling potential list of keys """
-    if not GEMINI_API_KEYS:
-        st.error("Gemini API keys not available.")
-        return None
-
-    # If multiple keys, choose one randomly; otherwise use the configured one (if single) or the first.
-    selected_key = random.choice(GEMINI_API_KEYS)
-
-    client = genai.Client(api_key=selected_key)
-
-
-    try:
-        response = client.models.generate_content(
-            model=model, contents=  prompt
-        )
-
-        return response.text
-    except Exception as e:
-        st.text('gemini_text_lib error ' + str(e))
-        time.sleep(4)
-        return None
+def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21',max_retries=5): # Using a stable model
+    tries = 0
+    while tries < max_retries:
+        st.text(f"Gemini working.. {model}")
+        """ Calls Gemini API, handling potential list of keys """
+        if not GEMINI_API_KEYS:
+            st.error("Gemini API keys not available.")
+            return None
+    
+        # If multiple keys, choose one randomly; otherwise use the configured one (if single) or the first.
+        selected_key = random.choice(GEMINI_API_KEYS)
+    
+        client = genai.Client(api_key=selected_key)
+    
+    
+        try:
+            response = client.models.generate_content(
+                model=model, contents=  prompt
+            )
+    
+            return response.text
+        except Exception as e:
+            st.text('gemini_text_lib error ' + str(e))
+            time.sleep(15)
+            tries += 1
+    
+    return None
 
 
 
