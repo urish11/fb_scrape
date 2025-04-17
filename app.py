@@ -542,7 +542,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     #st.text(gemini_res) 
     
                     gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
-                    # st.text(gemini_res) 
+                    st.text(gemini_res) 
     
     
     
