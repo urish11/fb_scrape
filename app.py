@@ -42,7 +42,7 @@ except Exception as e:
 
 
 # --- Gemini Function ---
-def gemini_text_lib(prompt, model='gemini-2.0-flash-thinking-exp-01-21',max_retries=5): # Using a stable model
+def gemini_text_lib(prompt, model='gemini-2.0-flash-001',max_retries=5): # Using a stable model
     tries = 0
     while tries < max_retries:
         
