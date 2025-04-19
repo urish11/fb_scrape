@@ -517,7 +517,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
             for df_idx, df_to_process in enumerate(dfs_splits):
                 st.text(f"{df_idx} {len(df_to_process)}")
-                st.text(df_to_process)
+                st.text(df_to_process["Text"].to_json())
                 continue
                 df_to_process = df_to_process.reset_index(drop=True)
 
