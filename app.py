@@ -523,7 +523,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_counts = df_to_process.value_counts(subset=["Text"]).reset_index(name="Count scrapped")
 
                 st.markdown(f"Proccessing {df_idx+1} df...")
-                st.text("\n".join(list(df_counts)))
+                st.text(df_counts.to_json())
                 continue
                 
                 # --- Prepare prompt (consider limits) ---
