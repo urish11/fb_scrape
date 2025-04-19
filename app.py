@@ -603,9 +603,17 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             lang= detect(max_seen_text)
                         except:
                             lang=''
-    
-                        final_df = pd.concat([final_df, pd.DataFrame([{"idea": idea,"lang":lang, "indices": indices, "len" : inx_len, "images": images,"max_url" : max_seen_url, "max_text" :                                 max_seen_text}])], ignore_index=True)
-                        df_appends.append(final_df)
+                        row_df = pd.DataFrame([{
+                            "idea": idea,
+                            "lang": lang,
+                            "indices": indices,
+                            "len": inx_len,
+                            "images": images,
+                            "max_url": max_seen_url,
+                            "max_text": max_seen_text
+                        }])
+
+                        df_appends.append(row_df)
 
                 else:
                     # Error message already displayed within gemini_text_lib
@@ -615,7 +623,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     else:
         st.error("No filtered data available to process. Please scrape data first.")
 
-
+    
     final_merged_df = pd.concat(df_appends)
                     
     st.dataframe(final_merged_df)
