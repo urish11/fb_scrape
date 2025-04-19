@@ -522,8 +522,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_to_process = df_to_process.reset_index(drop=True)
                 df_to_process_text  = pd.DataFrame(df_to_process["Text"], columns = ["Text"])
                 # st.text(df_to_process_text)
-                df_counts = df_to_process_text.value_counts(subset=["Text"]).reset_index(name="Count_scrapped")
-
+                df_counts = (
+                                df_to_process_text.reset_index()
+                                .groupby("Text")
+                                .agg(Count=("Text", "count"), Indices=("index", list))
+                                .reset_index()
+                            )
+                st.text(df_counts.to_string())
                 st.markdown(f"Proccessing {df_idx+1} df...")
                 # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
@@ -544,7 +549,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 
     
                 gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
-                I will provide the how many times the text occurred for you
+                I will provide the how many times the text occurred for you and the indices
                 table:
                 {df_counts.to_string()}"""
             
