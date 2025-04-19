@@ -537,7 +537,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                                 .agg(Count=("Text", "count"), Indices=("index", list))
                                 .reset_index()
                             )
-                st.text(df_counts.to_string())
+                # st.text(df_counts.to_string())
                 st.markdown(f"Proccessing {df_idx+1} df...")
                 # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
@@ -567,7 +567,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
     
                 if gemini_res:
-                    st.text(gemini_res) 
+                    # st.text(gemini_res) 
 
                     final_df = pd.DataFrame()
                     st.subheader(" Gemini Analysis Results")
