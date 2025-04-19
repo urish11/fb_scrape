@@ -512,6 +512,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
+            df_to_process  = df_to_process[df_to_process["Text"].str.len() <= 500]
+
             tokens =count_string_tokens(prompt = "\n".join(list(df_to_process["Text"])),model="gemini-2.0-flash-001	")
             chunks_num = tokens//200000 + 1  
             df_appends = []
