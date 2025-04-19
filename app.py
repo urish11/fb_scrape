@@ -510,8 +510,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
             df_appends = []
-            max_rows = 1000
+            max_rows = 3500
             dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
+            st.text(f"Num of chucks {len(dfs_splits)}")
 
           
 
