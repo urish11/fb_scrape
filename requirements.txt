@@ -8,3 +8,4 @@ lxml
 openpyxl 
 google-genai
 langdetect
+tokencost

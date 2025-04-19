@@ -21,6 +21,9 @@ from google import genai
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
 from langdetect import detect
 import numpy as np
+from tokencost import count_string_tokens
+
+
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 # --- Gemini Import and Configuration ---
@@ -509,10 +512,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
+            tokens =count_string_tokens(prompt = "\n".join(list(df_to_process["Text"])),model="gemini-2.0-flash-001	")
+            chunks_num = tokens//200000 + 1  
             df_appends = []
             max_rows = 3500
-            dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
-            st.text(f"Num of chucks {len(dfs_splits)}")
+            dfs_splits = np.array_split(df_to_process,chunks_num)
+            st.text(f"Tokens :{tokens} Num of chucks {len(dfs_splits)}")
 
           
 
