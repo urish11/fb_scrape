@@ -520,7 +520,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 # st.text("\n".join(list(df_to_process["Text"])))
                 
                 df_to_process = df_to_process.reset_index(drop=True)
-                df_to_process_text  = df_to_process["Text"]
+                df_to_process_text  = pd.DataFrame(df_to_process["Text"], columns = ["Text"])
                 st.text(df_to_process_text)
                 df_counts = df_to_process_text.value_counts(subset=["Text"]).reset_index(name="Count_scrapped")
 
