@@ -521,13 +521,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 
                 df_to_process = df_to_process.reset_index(drop=True)
                 df_to_process_text  = pd.DataFrame(df_to_process["Text"], columns = ["Text"])
-                st.text(df_to_process_text)
+                # st.text(df_to_process_text)
                 df_counts = df_to_process_text.value_counts(subset=["Text"]).reset_index(name="Count_scrapped")
 
                 st.markdown(f"Proccessing {df_idx+1} df...")
-                st.text(df_counts.to_string())
+                # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
-                continue
+                
                 
                 # --- Prepare prompt (consider limits) ---
                 # Example: Use unique texts, limit number of texts sent
