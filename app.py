@@ -515,12 +515,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
           
 
-            for df_idx, df_to_process in enumerate(dfs_splits):
-                st.text(f"{df_idx} {len(df_to_process)}")
-                # st.text("\n".join(list(df_to_process["Text"])))
+            for df_idx, df_chunk  in enumerate(dfs_splits):
+                st.text(f"{df_idx} {len(df_chunk)}")
+                # st.text("\n".join(list(df_chunk["Text"])))
                 
-                df_to_process = df_to_process.reset_index(drop=True)
-                df_to_process_text  = pd.DataFrame(df_to_process["Text"], columns = ["Text"])
+                df_chunk = df_chunk.reset_index(drop=True)
+                df_to_process_text  = pd.DataFrame(df_chunk["Text"], columns = ["Text"])
                 # st.text(df_to_process_text)
                 df_counts = (
                                 df_to_process_text.reset_index()
@@ -576,7 +576,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         inx_len = len(list(indices))
                         hash_urls={}
                         for idx in list(indices): #url:times
-                            landing_page = df_to_process.iloc[idx]["Landing_Page"]
+                            landing_page = df_chunk.iloc[idx]["Landing_Page"]
                             if landing_page in hash_urls:
                                 hash_urls[landing_page] += 1
                             else:
@@ -585,7 +585,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                         text_urls = {}
                         for idx in list(indices): #text:times
-                            text = df_to_process.iloc[idx]["Text"]
+                            text = df_chunk.iloc[idx]["Text"]
                             if text in text_urls:
                                 text_urls[text] += 1
                             else:
@@ -593,7 +593,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         max_seen_text = max(text_urls, key=text_urls.get)
     
     
-                        matching_rows = df_to_process.iloc[indices]
+                        matching_rows = df_chunk.iloc[indices]
                         images = "|".join(matching_rows['Media_URL'].tolist())
                         try:
                             lang= detect(max_seen_text)
