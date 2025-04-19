@@ -42,7 +42,7 @@ except Exception as e:
 
 
 # --- Gemini Function ---
-def gemini_text_lib(prompt, model='gemini-2.5-flash-preview-04-17',max_retries=5): # Using a stable model  
+def gemini_text_lib(prompt, model='gemini-2.5-pro-preview-03-25',max_retries=5): # Using a stable model  
     tries = 0
     while tries < max_retries:
         
@@ -510,7 +510,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         # Check if 'Text' column exists
         if "Text" in df_to_process.columns:
             df_appends = []
-            max_rows = 2000
+            max_rows = 1200
             dfs_splits = np.array_split(df_to_process,len(df_to_process)//max_rows+1)
 
             for df_idx, df_to_process in enumerate(dfs_splits):
