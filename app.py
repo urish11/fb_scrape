@@ -521,6 +521,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 
                 df_to_process = df_to_process.reset_index(drop=True)
                 df_to_process_text  = df_to_process["Text"]
+                st.text(df_to_process_text)
                 df_counts = df_to_process_text.value_counts(subset=["Text"]).reset_index(name="Count_scrapped")
 
                 st.markdown(f"Proccessing {df_idx+1} df...")
