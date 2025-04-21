@@ -541,6 +541,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             )
                 # st.text(df_counts.to_string())
                 st.markdown(f"Proccessing {df_idx+1} df...")
+                st.dataframe(df_counts)
                 # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
                 
