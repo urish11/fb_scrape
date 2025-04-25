@@ -386,6 +386,7 @@ search_terms_input = st.text_area(
     height=150,
     help="Each line is a separate search query."
 )
+auto_gemini = st.checkbox("Auto Gemini Analyze?", value=False)
 st.info("ℹ️ WebDriver configured for Streamlit Cloud.", icon="☁️")
 
 col1, col2 = st.columns(2)
@@ -506,7 +507,7 @@ else:
 
 # --- Gemini Processing Button (uses session state) ---
 st.subheader(" Analyze Trends (Optional)")
-if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None)):
+if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None) or auto_gemini):
     if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
         df_to_process = st.session_state.combined_df
 
