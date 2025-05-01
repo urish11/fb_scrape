@@ -241,6 +241,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
             status = "Not Found" # Placeholder
             ad_text = "Not Found" # Placeholder
             media_url = "Not Found" # Placeholder
+            count = 1
             # --- [INSERT EXACT EXTRACTION CODE FROM PREVIOUS VERSION HERE] ---
              # --- Extract Status ---
             try:
@@ -271,6 +272,24 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                             ad_text = cleaned_text
                             break # Found good text
                 if ad_text in ["Not Found", ""]: ad_text = "Not Found"
+            except Exception: pass
+
+# --- Extract count Text ---
+            try:
+                count_selectors = [
+                   'div.x6s0dn4.x78zum5.xsag5q8 span[dir="auto"]', # Specific parent + specific span type
+                 'div.x6s0dn4.x78zum5.xsag5q8 span', # General span  
+                ]
+                for selector in text_selectors:
+                    elem = ad_block.select_one(selector)
+                    if elem:
+                        all_texts = elem.find_all(string=True, recursive=True)
+                        full_text = ' '.join(filter(None, (t.strip() for t in all_texts)))
+                        cleaned_text = ' '.join(full_text.split())
+                        if cleaned_text and cleaned_text.lower() not in ["sponsored", "suggested for you", ""]:
+                            count = "".join(filter(str.isdigit, cleaned_text))
+                            break # Found good text
+                if count in ["Not Found", ""]: ad_text = "Not Found"
             except Exception: pass
 
             # --- Extract Image or Video Poster URL ---
@@ -360,6 +379,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  'Search_Term': search_term,
                  'Status': status,
                  'Text': ad_text,
+                 'Count': count,
                  'Media_URL': media_url,
                  'Landing_Page': ad_link
              })
@@ -647,7 +667,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         except Exception as e:
                             print(f"Error processing most_common_img_urls: {e}")
 
-                            
+
                         padded_urls = (list(most_common_img_urls or []) + [None] * 3)[:3]
 
                         
