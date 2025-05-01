@@ -10,4 +10,4 @@ google-genai
 langdetect
 tokencost
 imagehash
-PIL
+pillow
