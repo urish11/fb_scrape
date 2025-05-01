@@ -280,7 +280,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                    'div.x6s0dn4.x78zum5.xsag5q8 span[dir="auto"]', # Specific parent + specific span type
                  'div.x6s0dn4.x78zum5.xsag5q8 span', # General span  
                 ]
-                for selector in text_selectors:
+                for selector in count_selectors:
                     elem = ad_block.select_one(selector)
                     if elem:
                         all_texts = elem.find_all(string=True, recursive=True)
