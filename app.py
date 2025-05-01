@@ -100,7 +100,7 @@ def get_top_3_images_hash(img_list):
             print(f'get_top_3_images_hash failed  : {e}')
     # most_common_hash =max(hashes_map, key= lambda k: k[1]['count'], reversed=True)[:3]
     top3_most_common_hash = sorted(hashes_map.items(), key = lambda k :k[1]['count'] , reverse= True)[:3]
-    print(top3_most_common_hash)
+    st.text(top3_most_common_hash)
     return top3_most_common_hash
 
 
