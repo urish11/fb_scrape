@@ -642,11 +642,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         most_common_hash = get_top_3_images_hash(matching_rows['Media_URL'].tolist())
                         most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
                         images = "|".join(most_common_img_urls)
-                        try:
-                            img1, img2, img3 = most_common_img_urls
+                        padded_urls = (list(most_common_img_urls or []) + [None] * 3)[:3]
 
-                        except:
-                            img1, img2, img3 = [None, None, None]
+                    
+                        img1, img2, img3 = padded_urls
+
+
                         try:
                             lang= detect(max_seen_text)
                         except:
