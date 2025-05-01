@@ -83,7 +83,7 @@ def get_top_3_images_hash(img_list):
     hashes_map = {}
     for image_url in img_list:
         # try:
-            if image_url:
+            if '60x60' not in image_url:
                 # st.text(f"Processing image URL: {image_url}")
                 image_res = requests.get(image_url)
                 image_res.raise_for_status()  
