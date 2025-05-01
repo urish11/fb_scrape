@@ -287,7 +287,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                         full_text = ' '.join(filter(None, (t.strip() for t in all_texts)))
                         cleaned_text = ' '.join(full_text.split())
                         if cleaned_text and cleaned_text.lower() not in ["sponsored", "suggested for you", ""]:
-                            count = "".join(filter(str.isdigit, cleaned_text))
+                            count = int("".join(filter(str.isdigit, cleaned_text)))
                             break # Found good text
                 if count in ["Not Found", ""]: ad_text = "Not Found"
             except Exception: pass
