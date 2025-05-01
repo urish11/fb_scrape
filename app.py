@@ -14,6 +14,8 @@ import time
 from datetime import datetime
 import traceback
 import io
+from PIL import Image
+
 import urllib.parse
 import os
 import random # Added import
@@ -22,6 +24,7 @@ from urllib.parse import urlparse, parse_qs, unquote # Import necessary function
 from langdetect import detect
 import numpy as np
 from tokencost import count_string_tokens
+import imagehash
 
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
@@ -73,6 +76,33 @@ def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # U
             tries += 1
     
     return None
+
+def get_top_3_images_hash(img_list):
+
+
+    hashes_map = {}
+    for image_url in img_list:
+        try:
+            if image_url.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image_res = requests.get(image_url)
+                image_res.raise_for_status()  
+
+                img = Image.open(io.BytesIO(image_res.content))
+                hash = imagehash.phash(img)
+                if str(hash) not in hashes_map.keys():
+                    hashes_map[str(hash)] = None
+                    hashes_map[str(hash)] = {'count':1 , 'data' : [image_url]}
+                elif str(hash) in hashes_map.keys():
+                    hashes_map[str(hash)]['data'] = hashes_map[str(hash)]['data'] + [image_url]
+                    hashes_map[str(hash)]['count'] += 1
+
+        except Exception as e:
+            print(f'get_top_3_images_hash failed  : {e}')
+    # most_common_hash =max(hashes_map, key= lambda k: k[1]['count'], reversed=True)[:3]
+    top3_most_common_hash = sorted(hashes_map.items(), key = lambda k :k[1]['count'] , reverse= True)[:3]
+
+    return top3_most_common_hash
+
 
 
 
@@ -607,7 +637,14 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
     
                         matching_rows = df_chunk.iloc[indices]
-                        images = "|".join(matching_rows['Media_URL'].tolist())
+                        most_common_hash = get_top_3_images_hash(matching_rows['Media_URL'].tolist())
+                        most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
+                        images = "|".join(most_common_img_urls)
+                        try:
+                            img1, img2, img3 = most_common_img_urls
+
+                        except:
+                            img1, img2, img3 = [None, None, None]
                         try:
                             lang= detect(max_seen_text)
                         except:
@@ -619,7 +656,10 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "len": inx_len,
                             "images": images,
                             "max_url": max_seen_url,
-                            "max_text": max_seen_text
+                            "max_text": max_seen_text,
+                            "img1": img1,
+                            "img2": img2,
+                            "img3": img3
                         }])
 
                         df_appends.append(row_df)
@@ -635,7 +675,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
     final_merged_df = pd.concat(df_appends)
                     
-    st.dataframe(final_merged_df)
+    st.dataframe(final_merged_df, column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium")})
 elif GEMINI_API_KEYS is None:
     st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
 

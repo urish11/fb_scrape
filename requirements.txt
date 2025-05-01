@@ -9,3 +9,5 @@ openpyxl
 google-genai
 langdetect
 tokencost
+imagehash
+PIL
