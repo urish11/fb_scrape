@@ -589,7 +589,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_counts = (
                                 df_to_process_text.reset_index()
                                 .groupby("Text")
-                                .agg(Count=("Text", "count"), Indices=("index", list))
+                                .agg(Count=("Count", "sum"), Indices=("index", list))
                                 .reset_index()
                             )
                 # st.text(df_counts.to_string())
