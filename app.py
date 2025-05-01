@@ -99,6 +99,7 @@ def get_top_3_images_hash(img_list):
         # except Exception as e:
         #     print(f'get_top_3_images_hash failed  : {e}')
     # most_common_hash =max(hashes_map, key= lambda k: k[1]['count'], reversed=True)[:3]
+    st.text(f"hashes_map : {hashes_map}")
     top3_most_common_hash = sorted(hashes_map.items(), key = lambda k :k[1]['count'] , reverse= True)[:3]
     st.text(top3_most_common_hash)
     return top3_most_common_hash
