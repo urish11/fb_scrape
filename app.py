@@ -639,12 +639,18 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
     
                         matching_rows = df_chunk.iloc[indices]
-                        most_common_hash = get_top_3_images_hash(matching_rows['Media_URL'].tolist())
-                        most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
-                        images = "|".join(most_common_img_urls)
+                        try:
+                            most_common_hash = get_top_3_images_hash(matching_rows['Media_URL'].tolist())
+                            most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
+                            images = "|".join(most_common_img_urls)
+
+                        except Exception as e:
+                            print(f"Error processing most_common_img_urls: {e}")
+
+                            
                         padded_urls = (list(most_common_img_urls or []) + [None] * 3)[:3]
 
-                    
+                        
                         img1, img2, img3 = padded_urls
 
 
