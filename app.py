@@ -583,7 +583,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_chunk = df_chunk.reset_index(drop=True)
                 df_to_process_text  = pd.DataFrame(df_chunk[["Text","Count"]], columns = ["Text","Count"])
                 df_to_process_text  = df_to_process_text[df_to_process_text["Text"].str.len() <= 500]
-
+                df_to_process_text['Count'] = pd.to_numeric(df_filtered_chunk['Count'], errors='coerce')
+                df_to_process_text['Count'] = df_filtered_chunk['Count'].fillna(0)
 
                 # st.text(df_to_process_text)
                 df_counts = (
