@@ -715,9 +715,9 @@ elif GEMINI_API_KEYS is None:
 
 
 if 'final_merged_df' in st.session_state :
-    df = pd.concat(df_appends)
-    df["selected"] = False  # Ensure column exists
-    st.session_state['final_merged_df'] = df
+    # df = pd.concat(df_appends)
+    # df["selected"] = False  # Ensure column exists
+    # st.session_state['final_merged_df'] = df
 
     # Use a local variable to hold current version
     current_df = st.session_state['final_merged_df'].copy()
