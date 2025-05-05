@@ -718,7 +718,7 @@ def on_change(x):
     st.session_state['final_merged_df'].loc[x.index, "selected"] = x["selected"]
 
 if 'final_merged_df' in st.session_state and not st.session_state['final_merged_df'].empty:
-    edited_df=st.data_editor(st.session_state['final_merged_df'], column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")}, use_container_width=True, hide_index=True )
+    edited_df=st.data_editor(st.session_state['final_merged_df'], column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")}, use_container_width=True, hide_index=True,key='editable_df' )
     final_merged_df = st.session_state['final_merged_df']
     st.session_state['final_merged_df'] = edited_df
 
