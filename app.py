@@ -678,7 +678,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                         try:
                             lang= detect(max_seen_text)
-                        except:
+                        except: 
                             lang=''
                         row_df = pd.DataFrame([{
                             "selected" : False,
