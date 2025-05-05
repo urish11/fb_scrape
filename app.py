@@ -707,7 +707,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
     final_merged_df = pd.concat(df_appends)
                     
-    st.dataframe(final_merged_df, column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")})
+    st.data_editor(final_merged_df, column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")})
 
     selected_df = final_merged_df[final_merged_df["selected"] == True]
     if st.button("Show selected row :)") and final_merged_df is not None:
