@@ -733,7 +733,7 @@ if 'final_merged_df' in st.session_state :
         },
         use_container_width=True,
         hide_index=True,
-        ignore_row_index=True
+        
     )
 
     # Let user manually confirm selection changes to sync
