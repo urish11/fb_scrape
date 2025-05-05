@@ -748,7 +748,7 @@ if 'final_merged_df' in st.session_state :
         st.dataframe(selected_df, hide_index=True, use_container_width=True,column_config={
             'img1': st.column_config.ImageColumn("Image 1", width="medium"),
             'img2': st.column_config.ImageColumn("Image 2", width="medium"),
-            'img3': st.column_config.ImageColumn("Image 3", width="medium"))
+            'img3': st.column_config.ImageColumn("Image 3", width="medium")})
 
 # --- Footer ---
 st.markdown("---")
