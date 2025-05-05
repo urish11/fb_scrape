@@ -717,7 +717,7 @@ elif GEMINI_API_KEYS is None:
 def on_change(x):
     st.session_state['final_merged_df'].loc[x.index, "selected"] = x["selected"]
 
-if st.session_state['final_merged_df']:
+if 'final_merged_df' in st.session_state and not st.session_state['final_merged_df'].empty:
     st.data_editor(st.session_state['final_merged_df'], column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")}, on_change=on_change , use_container_width=True, hide_index=True, key='final_merged_df' )
     final_merged_df = st.session_state['final_merged_df']
     selected_df = final_merged_df[final_merged_df["selected"] == True]
