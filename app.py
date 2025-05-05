@@ -730,7 +730,7 @@ if 'final_merged_df' in st.session_state :
             'img1': st.column_config.ImageColumn("Image 1", width="medium"),
             'img2': st.column_config.ImageColumn("Image 2", width="medium"),
             'img3': st.column_config.ImageColumn("Image 3", width="medium"),
-            "selected": st.column_config.CheckboxColumn("Selected")
+            "selected": st.column_config.CheckboxColumn("Selected",pinned = True)
         },
         use_container_width=True,
         hide_index=True,
