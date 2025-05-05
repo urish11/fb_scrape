@@ -744,7 +744,7 @@ if 'final_merged_df' in st.session_state :
         selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
     # if st.button("👁 Show Selected Rows"):
-        st.dataframe(selected_df)
+        st.dataframe(selected_df, hide_index=True, use_container_width=True)
 
 # --- Footer ---
 st.markdown("---")
