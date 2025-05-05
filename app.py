@@ -717,19 +717,35 @@ elif GEMINI_API_KEYS is None:
 def on_change(x):
     st.session_state['final_merged_df'].loc[x.index, "selected"] = x["selected"]
 
-if 'final_merged_df' in st.session_state and not st.session_state['final_merged_df'].empty:
-    edited_df=st.data_editor(st.session_state['final_merged_df'], column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")}, use_container_width=True, hide_index=True,key='editable_df' )
-    final_merged_df = st.session_state['final_merged_df']
-    # Write back only if it changed
-    if not edited_df.equals(st.session_state['final_merged_df']):
-        st.session_state['final_merged_df'] = edited_df.copy()
+if 'final_merged_df' not in st.session_state:
+    final_merged_df = pd.concat(df_appends)
+    final_merged_df["selected"] = False  # Ensure it exists
+    st.session_state['final_merged_df'] = final_merged_df
 
+# Show editable table without writing immediately to session state
+edited_df = st.data_editor(
+    st.session_state['final_merged_df'],
+    column_config={
+        'img1': st.column_config.ImageColumn("Image 1", width="medium"),
+        'img2': st.column_config.ImageColumn("Image 2", width="medium"),
+        'img3': st.column_config.ImageColumn("Image 3", width="medium"),
+        "selected": st.column_config.CheckboxColumn("Selected")
+    },
+    use_container_width=True,
+    hide_index=True,
+    key='editable_df'  # Separate key
+)
 
-    selected_df = final_merged_df[final_merged_df["selected"] == True]
+# Only update session state AFTER rendering
+if not edited_df.equals(st.session_state['final_merged_df']):
+    st.session_state['final_merged_df'] = edited_df.copy()
 
+# Work from the latest version
+final_merged_df = st.session_state['final_merged_df']
+selected_df = final_merged_df[final_merged_df["selected"] == True]
 
+if st.button("Show selected row :)"):
+    st.dataframe(selected_df)
 
-    if st.button("Show selected row :)") and final_merged_df is not None:
-            st.dataframe(selected_df)
 # --- Footer ---
 st.markdown("---")
