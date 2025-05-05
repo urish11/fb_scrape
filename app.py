@@ -714,36 +714,36 @@ elif GEMINI_API_KEYS is None:
 
 
 
-# if 'final_merged_df' not in st.session_state :
-#     df = pd.concat(df_appends)
-#     df["selected"] = False  # Ensure column exists
-#     st.session_state['final_merged_df'] = df
+if 'final_merged_df' in st.session_state :
+    df = pd.concat(df_appends)
+    df["selected"] = False  # Ensure column exists
+    st.session_state['final_merged_df'] = df
 
-# Use a local variable to hold current version
-current_df = st.session_state['final_merged_df'].copy()
+    # Use a local variable to hold current version
+    current_df = st.session_state['final_merged_df'].copy()
 
-# Display editor - do NOT connect to session_state via key
-edited_df = st.data_editor(
-    current_df,
-    column_config={
-        'img1': st.column_config.ImageColumn("Image 1", width="medium"),
-        'img2': st.column_config.ImageColumn("Image 2", width="medium"),
-        'img3': st.column_config.ImageColumn("Image 3", width="medium"),
-        "selected": st.column_config.CheckboxColumn("Selected")
-    },
-    use_container_width=True,
-    hide_index=True
-)
+    # Display editor - do NOT connect to session_state via key
+    edited_df = st.data_editor(
+        current_df,
+        column_config={
+            'img1': st.column_config.ImageColumn("Image 1", width="medium"),
+            'img2': st.column_config.ImageColumn("Image 2", width="medium"),
+            'img3': st.column_config.ImageColumn("Image 3", width="medium"),
+            "selected": st.column_config.CheckboxColumn("Selected")
+        },
+        use_container_width=True,
+        hide_index=True
+    )
 
-# Let user manually confirm selection changes to sync
-if st.button("Show Selected Rows"):
-    st.session_state['final_merged_df'] = edited_df.copy()
+    # Let user manually confirm selection changes to sync
+    if st.button("Show Selected Rows"):
+        st.session_state['final_merged_df'] = edited_df.copy()
 
-    # Work with updated session state
-    selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
+        # Work with updated session state
+        selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
-# if st.button("👁 Show Selected Rows"):
-    st.dataframe(selected_df)
+    # if st.button("👁 Show Selected Rows"):
+        st.dataframe(selected_df)
 
 # --- Footer ---
 st.markdown("---")
