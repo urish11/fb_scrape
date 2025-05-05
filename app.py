@@ -736,7 +736,7 @@ edited_df = st.data_editor(
 )
 
 # Let user manually confirm selection changes to sync
-if st.button("✅ Save Selection"):
+if st.button("Show Selected Rows"):
     st.session_state['final_merged_df'] = edited_df.copy()
 
     # Work with updated session state
