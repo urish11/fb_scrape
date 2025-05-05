@@ -714,17 +714,17 @@ elif GEMINI_API_KEYS is None:
 
 
 
-def on_change(x):
-    st.session_state['final_merged_df'].loc[x.index, "selected"] = x["selected"]
-
 if 'final_merged_df' not in st.session_state:
-    final_merged_df = pd.concat(df_appends)
-    final_merged_df["selected"] = False  # Ensure it exists
-    st.session_state['final_merged_df'] = final_merged_df
+    df = pd.concat(df_appends)
+    df["selected"] = False  # Ensure column exists
+    st.session_state['final_merged_df'] = df
 
-# Show editable table without writing immediately to session state
+# Use a local variable to hold current version
+current_df = st.session_state['final_merged_df'].copy()
+
+# Display editor - do NOT connect to session_state via key
 edited_df = st.data_editor(
-    st.session_state['final_merged_df'],
+    current_df,
     column_config={
         'img1': st.column_config.ImageColumn("Image 1", width="medium"),
         'img2': st.column_config.ImageColumn("Image 2", width="medium"),
@@ -732,19 +732,17 @@ edited_df = st.data_editor(
         "selected": st.column_config.CheckboxColumn("Selected")
     },
     use_container_width=True,
-    hide_index=True,
-    key='editable_df'  # Separate key
+    hide_index=True
 )
 
-# Only update session state AFTER rendering
-if not edited_df.equals(st.session_state['final_merged_df']):
+# Let user manually confirm selection changes to sync
+if st.button("✅ Save Selection"):
     st.session_state['final_merged_df'] = edited_df.copy()
 
-# Work from the latest version
-final_merged_df = st.session_state['final_merged_df']
-selected_df = final_merged_df[final_merged_df["selected"] == True]
+# Work with updated session state
+selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
-if st.button("Show selected row :)"):
+if st.button("👁 Show Selected Rows"):
     st.dataframe(selected_df)
 
 # --- Footer ---
