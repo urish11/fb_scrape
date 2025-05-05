@@ -684,14 +684,15 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "selected" : False,
                             "idea": idea,
                             "lang": lang,
-                            "indices": indices,
+
                             "len": inx_len,
                             "images": images,
                             "max_url": max_seen_url,
                             "max_text": max_seen_text,
                             "img1": img1,
                             "img2": img2,
-                            "img3": img3
+                            "img3": img3,
+                            "indices": indices,                            
                         }])
 
                         df_appends.append(row_df)
