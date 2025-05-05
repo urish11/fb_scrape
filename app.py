@@ -681,6 +681,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         except:
                             lang=''
                         row_df = pd.DataFrame([{
+                            "selected" : False,
                             "idea": idea,
                             "lang": lang,
                             "indices": indices,
@@ -706,7 +707,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
     final_merged_df = pd.concat(df_appends)
                     
-    st.dataframe(final_merged_df, column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium")})
+    st.dataframe(final_merged_df, column_config={'img1': st.column_config.ImageColumn("Image 1", width="medium"),'img2': st.column_config.ImageColumn("Image 2", width="medium"),'img3': st.column_config.ImageColumn("Image 3", width="medium"), "selected": st.column_config.CheckboxColumn("Selected")})
+
+    selected_df = final_merged_df[final_merged_df["selected"] == True]
+    if st.button("Show selected row :)") and final_merged_df is not None:
+        st.dataframe(selected_df)
+
 elif GEMINI_API_KEYS is None:
     st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
 
