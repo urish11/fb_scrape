@@ -722,7 +722,7 @@ if 'final_merged_df' in st.session_state :
 
     # Use a local variable to hold current version
     current_df = st.session_state['final_merged_df'].copy()
-
+ 
     # Display editor - do NOT connect to session_state via key
     edited_df = st.data_editor(
         current_df,
