@@ -727,7 +727,7 @@ if 'final_merged_df' in st.session_state :
     edited_df = st.data_editor(
         current_df,
         column_config={
-            "idea": st.column_config(pinned = True),
+            "idea": st.column_config.TextColumn(pinned = True),
             'img1': st.column_config.ImageColumn("Image 1", width="medium"),
             'img2': st.column_config.ImageColumn("Image 2", width="medium"),
             'img3': st.column_config.ImageColumn("Image 3", width="medium"),
