@@ -739,10 +739,10 @@ edited_df = st.data_editor(
 if st.button("✅ Save Selection"):
     st.session_state['final_merged_df'] = edited_df.copy()
 
-# Work with updated session state
-selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
+    # Work with updated session state
+    selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
-if st.button("👁 Show Selected Rows"):
+# if st.button("👁 Show Selected Rows"):
     st.dataframe(selected_df)
 
 # --- Footer ---
