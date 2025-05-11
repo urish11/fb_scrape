@@ -422,7 +422,13 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
 def get_html_content(url):
     # Set up headless browser
     options = Options()
-    options.headless = True
+    options.add_argument("--headless")  # Run headless REQUIRED for Streamlit Cloud
+    options.add_argument("--no-sandbox")  # REQUIRED
+    options.add_argument("--disable-dev-shm-usage")  # REQUIRED
+    options.add_argument("--disable-gpu") # Also often recommended
+    options.add_argument("--window-size=1920,1080") # Can be helpful
+    options.add_argument('--log-level=3') # Suppress logs
+    # options.headless = True
     driver = webdriver.Chrome(options=options)
 
     try:
