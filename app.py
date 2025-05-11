@@ -800,7 +800,7 @@ if 'final_merged_df' in st.session_state :
                     content = get_html_content(row['max_url'])
                     # st.text(content)
                     prompt = f"""write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
-                    only the article content no footers no images!! no images! . return JUST the html code \n\n\n{content}"""
+                    only the article content no footers no images!! no images! no divs . return JUST the html code \n\n\n{content}"""
 
                     pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
 
