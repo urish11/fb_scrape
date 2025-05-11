@@ -448,7 +448,7 @@ def get_html_content(url):
         # for tag in soup.find_all(allowed_tags):
         #     tag.attrs = {k: v for k, v in tag.attrs.items() if k in ['href', 'src', 'alt']}
 
-        return str(soup)
+        return str(soup.text)
 
     except Exception as e:
         st.text("error in get_html_content" + e)
