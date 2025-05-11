@@ -786,7 +786,7 @@ if 'final_merged_df' in st.session_state :
 
     # Let user manually confirm selection changes to sync
     is_gen_html = st.checkbox("Gen HTML content")
-    if st.button("Show Selected Rows"):
+    if st.button("Process Selected Rows"):
         st.session_state['final_merged_df'] = edited_df.copy()
 
         # Work with updated session state
