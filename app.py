@@ -790,6 +790,7 @@ if 'final_merged_df' in st.session_state :
 
                     content = get_html_content(row['max_url'])
                     st.text(content)
+                    input()
                     prompt = f"""write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
                     only the article content no footers no images. return JUST the html code \n\n\n{content}"""
 
