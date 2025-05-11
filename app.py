@@ -447,8 +447,10 @@ def get_html_content(url):
         # # Clean unwanted attributes
         # for tag in soup.find_all(allowed_tags):
         #     tag.attrs = {k: v for k, v in tag.attrs.items() if k in ['href', 'src', 'alt']}
-        for script in soup.find_all("script"):
-            script.decompose()
+        for tag in ["style", "link", "meta", "header", "footer", "input", "svg"]:
+
+            for script in soup.find_all(tag):
+                script.decompose()
         
         # Optional: also remove iframes, noscript, or style if needed
         for tag in soup(['iframe', 'noscript']):
