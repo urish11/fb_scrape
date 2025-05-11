@@ -798,7 +798,7 @@ if 'final_merged_df' in st.session_state :
                 try:
 
                     content = get_html_content(row['max_url'])
-                    st.text(content)
+                    # st.text(content)
                     prompt = f"""write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
                     only the article content no footers no images. return JUST the html code \n\n\n{content}"""
 
@@ -807,7 +807,7 @@ if 'final_merged_df' in st.session_state :
                 except Exception as e:
                     pure_html = f"error {e} "
 
-                html_res.append(pure_html)
+                html_res.append(pure_html.replace("```html","").replace("```",""))
 
                 selected_df['html'] = html_res
 
