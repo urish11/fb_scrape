@@ -770,7 +770,7 @@ if 'final_merged_df' in st.session_state :
     )
 
     # Let user manually confirm selection changes to sync
-    is_gen_html = st.button("Gen HTML content")
+    is_gen_html = st.checkbox("Gen HTML content")
     if st.button("Show Selected Rows"):
         st.session_state['final_merged_df'] = edited_df.copy()
 
@@ -778,12 +778,20 @@ if 'final_merged_df' in st.session_state :
         selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
         if is_gen_html:
+            html_res=[]
             for index, row in selected_df.iterrows():
+                try:
 
-                prompt = """write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\nonly the article content no footers no images. return JUST the html code"""
-                content = get_html_content(row['max_url'])
-                pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
-                selected_df.iloc[index]['html'] = pure_html
+                    prompt = """write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\nonly the article content no footers no images. return JUST the html code"""
+                    content = get_html_content(row['max_url'])
+                    pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
+
+                except Exception as e:
+                    pure_html = f"error {e} "
+
+                html_res.append(pure_html)
+
+                selected_df['html'] = html_res
 
                 
     # if st.button("👁 Show Selected Rows"):
