@@ -444,6 +444,9 @@ def get_html_content(url):
 
         return str(soup)
 
+    except Exception as e:
+        st.text("error in get_html_content" + e)
+        return None
     finally:
         driver.quit()
 
