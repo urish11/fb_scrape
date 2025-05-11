@@ -419,6 +419,34 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  status_messages.append(f"Error closing WebDriver for '{search_term}': {quit_err}")
 
 
+def get_html_content(url):
+    # Set up headless browser
+    options = Options()
+    options.headless = True
+    driver = webdriver.Chrome(options=options)
+
+    try:
+        driver.get(url)
+        time.sleep(2)  # Let JS load
+
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Keep only allowed tags
+        allowed_tags = ['a', 'p', 'h1', 'h2', 'h3', 'h4', 'li', 'ul', 'img']
+        for tag in soup.find_all(True):
+            if tag.name not in allowed_tags:
+                tag.decompose()
+
+        # Clean unwanted attributes
+        for tag in soup.find_all(allowed_tags):
+            tag.attrs = {k: v for k, v in tag.attrs.items() if k in ['href', 'src', 'alt']}
+
+        return str(soup)
+
+    finally:
+        driver.quit()
+
 # --- Streamlit App UI ---
 st.title("Facebook Ads Library Multi-Term Scraper + Gemini Analysis")
 st.markdown("""
@@ -739,12 +767,22 @@ if 'final_merged_df' in st.session_state :
     )
 
     # Let user manually confirm selection changes to sync
+    is_gen_html = st.button("Gen HTML content")
     if st.button("Show Selected Rows"):
         st.session_state['final_merged_df'] = edited_df.copy()
 
         # Work with updated session state
         selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
 
+        if is_gen_html:
+            for index, row in selected_df.iterrows():
+
+                prompt = """write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\nonly the article content no footers no images. return JUST the html code"""
+                content = get_html_content(row['max_url'])
+                pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
+                selected_df.iloc[index]['html'] = pure_html
+
+                
     # if st.button("👁 Show Selected Rows"):
         st.dataframe(selected_df, hide_index=True, use_container_width=True,column_config={
             'img1': st.column_config.ImageColumn("Image 1", width="medium"),
