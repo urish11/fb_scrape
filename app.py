@@ -438,15 +438,15 @@ def get_html_content(url):
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
 
-        # Keep only allowed tags
-        allowed_tags = ['a', 'p', 'h1', 'h2', 'h3', 'h4', 'li', 'ul', 'img']
-        for tag in soup.find_all(True):
-            if tag.name not in allowed_tags:
-                tag.decompose()
+        # # Keep only allowed tags
+        # allowed_tags = ['a', 'p', 'h1', 'h2', 'h3', 'h4', 'li', 'ul', 'img']
+        # for tag in soup.find_all(True):
+        #     if tag.name not in allowed_tags:
+        #         tag.decompose()
 
-        # Clean unwanted attributes
-        for tag in soup.find_all(allowed_tags):
-            tag.attrs = {k: v for k, v in tag.attrs.items() if k in ['href', 'src', 'alt']}
+        # # Clean unwanted attributes
+        # for tag in soup.find_all(allowed_tags):
+        #     tag.attrs = {k: v for k, v in tag.attrs.items() if k in ['href', 'src', 'alt']}
 
         return str(soup)
 
