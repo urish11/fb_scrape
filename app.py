@@ -723,16 +723,27 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
                         url_title_map = asyncio.run(fetch_all_titles(urls))
                         st.text(url_title_map)
-                        input()
+                        
+                        count_map ={}
 
-
-                        for idx in list(indices): #url:times
-                            landing_page = df_chunk.iloc[idx]["Landing_Page"]
-                            if landing_page in hash_urls:
-                                hash_urls[landing_page] += 1
+                        for elem in url_title_map:
+                            title = elem[1]
+                            if title not in count_map.keys():
+                                count_map[title] = 1
                             else:
-                                hash_urls[landing_page] = 1
-                        max_seen_url = max(hash_urls, key=hash_urls.get)
+                                count_map[title] += 1
+                        max_seen_title = max(hash_urls, key=hash_urls.get)
+                        max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_title), None)
+
+
+
+                        # for idx in list(indices): #url:times
+                        #     landing_page = df_chunk.iloc[idx]["Landing_Page"]
+                        #     if landing_page in hash_urls:
+                        #         hash_urls[landing_page] += 1
+                        #     else:
+                        #         hash_urls[landing_page] = 1
+                        # max_seen_url = max(hash_urls, key=hash_urls.get)
                         
                         text_urls = {}
                         for idx in list(indices): #text:times
