@@ -289,7 +289,9 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                 if page_name in ["Not Found", ""]: page_id = "Not Found"
 
                 # page_id = str(page_id)
-            except Exception: page_id ='fail'
+            except Exception:
+                page_id ='fail'
+                page_name = 'fail'
 
 # --- Extract count Text ---
             try:
