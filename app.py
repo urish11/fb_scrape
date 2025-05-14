@@ -859,7 +859,7 @@ if 'final_merged_df' in st.session_state :
  
                 except Exception as e:
                     pure_html = f"error {e} "
-                st.text(pure_html)
+                st.text(str(pure_html))
                 title_res.append(pure_html['title'].replace("```json",""))
                 html_res.append(pure_html['html'].replace("```html","").replace("```","").replace("```json",""))
 
