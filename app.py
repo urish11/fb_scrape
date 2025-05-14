@@ -865,7 +865,7 @@ if 'final_merged_df' in st.session_state :
                 html_res.append(pure_html['html'].replace("```html","").replace("```","").replace("```json",""))
 
             selected_df['html'] = html_res
-            selected_df['html_title'] = html_res
+            selected_df['html_title'] = title_res
 
                 
     # if st.button("👁 Show Selected Rows"):
