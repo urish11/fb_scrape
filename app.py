@@ -285,6 +285,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                         page_name = elem.find_all(string=True, recursive=True)
                         page_name =list(page_name)[0]
                         page_id = elem.get("href", "Not Found")
+                        page_id = page_id.split("/")[3]
 
                 if page_id in ["Not Found", ""]: page_id = "Not Found"
                 if page_name in ["Not Found", ""]: page_id = "Not Found"
