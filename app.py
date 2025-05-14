@@ -594,7 +594,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                     scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
                 elif mode == "Page Search":
                     if "?" in base_url_template:
-                        scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&view_all_page_idq={encoded_term}"
+                        scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&view_all_page_id={encoded_term}"
                     else:
                         scrape_url = f"{base_url_template}?view_all_page_id={encoded_term}"
                     scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
