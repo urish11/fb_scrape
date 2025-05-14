@@ -856,7 +856,7 @@ if 'final_merged_df' in st.session_state :
                     gemini_res =gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
                     st.text(gemini_res)
                     pure_html = json.loads(gemini_res.replace("```html","").replace("```","").replace("```json",""))
-
+ 
                 except Exception as e:
                     pure_html = f"error {e} "
                 st.text(pure_html)
