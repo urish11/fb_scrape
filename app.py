@@ -844,23 +844,25 @@ if 'final_merged_df' in st.session_state :
         selected_df = st.session_state['final_merged_df_selected'][st.session_state['final_merged_df_selected']["selected"] == True]
 
         if is_gen_html:
+            title_res = []
             html_res=[]
             for index, row in selected_df.iterrows():
                 try:
 
                     content = get_html_content(row['max_url'])
                     # st.text(content)
-                    prompt = f"""write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
-                    only the article content no footers no images!! no images! no divs. return in language same as input . return JUST the html code . \n\n\n{content}"""
+                    prompt = """write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
+                    only the article content no footers no images!! no images! no writer name!, no divs. return in language same as input . return json dict, 2 keys : 'title', 'html'  . \n example :{'title' : 'Learn more about how veterans ...', 'html' :'full article w/o title with html tags..'} \n\n""" + content
 
                     pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
 
                 except Exception as e:
                     pure_html = f"error {e} "
-
-                html_res.append(pure_html.replace("```html","").replace("```",""))
+                title_res.append(pure_html['title'].replace("```html","").replace("```",""))
+                html_res.append(pure_html['html'].replace("```html","").replace("```",""))
 
             selected_df['html'] = html_res
+            selected_df['html_title'] = html_res
 
                 
     # if st.button("👁 Show Selected Rows"):
