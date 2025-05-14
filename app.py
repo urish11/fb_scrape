@@ -636,7 +636,7 @@ else:
 
 # --- Gemini Processing Button (uses session state) ---
 st.subheader(" Analyze Trends (Optional)")
-if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None) ) or( auto_gemini and st.session_state.combined_df is not None and not st.session_state.combined_df.empty) :
+if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None) ) or( auto_gemini and st.session_state.combined_df is not None and not st.session_state.combined_df.empty and st.session_state['final_merged_df'] is None) :
     if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
         df_to_process = st.session_state.combined_df
 
