@@ -526,7 +526,7 @@ Provide Base URL & Search Terms. Scrapes ads in the cloud, combines results, **f
 
 # --- Inputs ---
 st.subheader("Configuration")
-mode = st.radio(["General Search","Page Search"] , index=0)
+mode = st.radio("Select Search Mode",["General Search","Page Search"] , index=0)
 
 if mode == 'General Search':
     default_base_url = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=keyword_unordered&q="
