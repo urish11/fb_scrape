@@ -854,7 +854,7 @@ if 'final_merged_df' in st.session_state :
                     prompt = """write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
                     only the article content no footers no images!! no images! no writer name!, no divs. return in language same as input . return json dict, 2 keys : 'title', 'html'  . \n example :{'title' : 'Learn more about how veterans ...', 'html' :'full article w/o title with html tags..'} \n\n""" + content
 
-                    pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
+                    pure_html = json.loads(gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' ))
 
                 except Exception as e:
                     pure_html = f"error {e} "
