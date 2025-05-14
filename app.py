@@ -722,7 +722,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
                         url_title_map = asyncio.run(fetch_all_titles(urls))
-                        st.text(url_title_map)
+                        # st.text(url_title_map)
                         
                         count_map ={}
 
@@ -732,8 +732,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                                 count_map[title] = 1
                             else:
                                 count_map[title] += 1
-                        max_seen_title = max(count_map, key=count_map.get)
-                        max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_title), None)
+                        max_seen_url_title = max(count_map, key=count_map.get)
+                        max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_url_title),
+                                                             None)
 
 
 
@@ -784,6 +785,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "images": images,
                             "max_url": max_seen_url,
                             "max_text": max_seen_text,
+                            "max_seen_url_title" :max_seen_url_title,
                             "img1": img1,
                             "img2": img2,
                             "img3": img3,
@@ -849,7 +851,7 @@ if 'final_merged_df' in st.session_state :
                     content = get_html_content(row['max_url'])
                     # st.text(content)
                     prompt = f"""write as html using only  <a>, <p>, <h1>–<h4>, <li>, <ul>, <img>.\n
-                    only the article content no footers no images!! no images! no divs. return in language same as input . return JUST the html code \n\n\n{content}"""
+                    only the article content no footers no images!! no images! no divs. return in language same as input . return JUST the html code . \n\n\n{content}"""
 
                     pure_html = gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' )
 
