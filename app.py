@@ -636,7 +636,7 @@ else:
 
 # --- Gemini Processing Button (uses session state) ---
 st.subheader(" Analyze Trends (Optional)")
-if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None) ) or( auto_gemini and st.session_state.combined_df is not None and not st.session_state.combined_df.empty and st.session_state['final_merged_df'] is None) :
+if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMINI_API_KEYS is None) ) or ( auto_gemini and st.session_state.combined_df is not None and not st.session_state.combined_df.empty and st.session_state['final_merged_df'] is None) :
     if st.session_state.combined_df is not None and not st.session_state.combined_df.empty:
         df_to_process = st.session_state.combined_df
 
@@ -838,10 +838,10 @@ if 'final_merged_df' in st.session_state :
     # Let user manually confirm selection changes to sync
     is_gen_html = st.checkbox("Gen HTML content")
     if st.button("Process Selected Rows"):
-        st.session_state['final_merged_df'] = edited_df.copy()
+        st.session_state['final_merged_df_selected'] = edited_df.copy()
 
         # Work with updated session state
-        selected_df = st.session_state['final_merged_df'][st.session_state['final_merged_df']["selected"] == True]
+        selected_df = st.session_state['final_merged_df_selected'][st.session_state['final_merged_df_selected']["selected"] == True]
 
         if is_gen_html:
             html_res=[]
