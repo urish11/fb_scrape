@@ -722,7 +722,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
                         url_title_map = fetch_all_titles(urls)
-                        print(url_title_map)
+                        st.text(url_title_map)
                         input()
 
 
