@@ -282,7 +282,7 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                 for selector in text_selectors:
                     elem = ad_block.select_one(selector)
                     if elem:
-                        page_name = elem.find_all(string=True, recursive=True)[0]
+                        page_name = elem.find_all(string=True, recursive=True)
                         page_id = elem.get("href", "Not Found")
 
                 if page_id in ["Not Found", ""]: page_id = "Not Found"
