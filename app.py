@@ -602,7 +602,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
 
 
 
-                with st.spinner(f"Scraping '{term}'..." + scrape_url):
+                with st.spinner(f"Scraping '{term}'..." ):
                     scraped_df, log_messages = scrape_facebook_ads(
                         scrape_url, term, scroll_pause, max_scrolls
                     )
