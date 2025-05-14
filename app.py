@@ -732,7 +732,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                                 count_map[title] = 1
                             else:
                                 count_map[title] += 1
-                        max_seen_title = max(hash_urls, key=hash_urls.get)
+                        max_seen_title = max(count_map, key=count_map.get)
                         max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_title), None)
 
 
