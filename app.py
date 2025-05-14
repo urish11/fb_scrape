@@ -544,7 +544,7 @@ if mode == 'Page Search':
 
 
 search_terms_input = st.text_area(
-    "Enter Search Terms (one per line):",
+    "Enter Search Terms\Page IDs (one per line):",
     height=150,
     help="Each line is a separate search query."
 )
