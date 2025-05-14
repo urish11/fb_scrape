@@ -15,7 +15,8 @@ from datetime import datetime
 import traceback
 import io
 from PIL import Image
-
+import asyncio
+import aiohttp
 import urllib.parse
 import os
 import random # Added import
@@ -419,6 +420,36 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                  status_messages.append(f"Error closing WebDriver for '{search_term}': {quit_err}")
 
 
+# Fetch a single title with a semaphore (concurrency limiter)
+async def fetch_title(session, url, semaphore, timeout=10):
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/122.0.0.0 Safari/537.36"
+        )
+    }
+
+    async with semaphore:
+        try:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=timeout)) as resp:
+                text = await resp.text()
+                soup = BeautifulSoup(text, 'html.parser')
+                title_tag = soup.find('title')
+                return url, title_tag.get_text(strip=True) if title_tag else "[No title found]"
+        except Exception as e:
+            return url, f"[Error: {e}]"
+
+# Limit concurrency using a semaphore
+async def fetch_all_titles(urls, max_concurrent=20):
+    semaphore = asyncio.Semaphore(max_concurrent)
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_title(session, url, semaphore) for url in urls]
+        results = await asyncio.gather(*tasks)
+        return results
+
+
+
 def get_html_content(url):
     # Set up headless browser
     options = Options()
@@ -688,6 +719,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         indices = row['indices']
                         inx_len = len(list(indices))
                         hash_urls={}
+
+                        urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
+                        url_title_map = fetch_all_titles(urls)
+                        print(url_title_map)
+                        input()
+
+
                         for idx in list(indices): #url:times
                             landing_page = df_chunk.iloc[idx]["Landing_Page"]
                             if landing_page in hash_urls:
