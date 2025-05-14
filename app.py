@@ -699,7 +699,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             
                 st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
-                    gemini_res = gemini_text_lib(gemini_prompt) # Use the dedicated function
+                    gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-flash-preview-04-17") # Use the dedicated function
     
                 if gemini_res:
                     # st.text(gemini_res) 
