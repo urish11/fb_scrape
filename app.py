@@ -526,18 +526,31 @@ Provide Base URL & Search Terms. Scrapes ads in the cloud, combines results, **f
 
 # --- Inputs ---
 st.subheader("Configuration")
-default_base_url = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=keyword_unordered&q="
-base_url_template = st.text_input(
-    "Enter Base URL Template (ending with 'q=' or ready for term):",
-    default_base_url,
-    help="Example: https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&q="
-)
+mode = st.radio(["General Search","Page Search"] , index=0)
+
+if mode == 'General Search':
+    default_base_url = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=keyword_unordered&q="
+    base_url_template = st.text_input(
+        "Enter Base URL Template (ending with 'q=' or ready for term):",
+        default_base_url,
+        help="Example: https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&q="
+    )
+if mode == 'Page Search':
+    default_base_url = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=page&view_all_page_id="
+    base_url_template = st.text_input(
+        "Enter Base URL Template (ending with 'view_all_page_id=' or ready for term):",
+        default_base_url,
+    )
+
+
 search_terms_input = st.text_area(
     "Enter Search Terms (one per line):",
     height=150,
     help="Each line is a separate search query."
 )
 auto_gemini = st.checkbox("Auto Gemini Analyze?", value=False)
+
+
 st.info("ℹ️ WebDriver configured for Streamlit Cloud.", icon="☁️")
 
 col1, col2 = st.columns(2)
@@ -570,11 +583,24 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                 term_start_time = time.time()
                 overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'... total scraped : {len(all_results_dfs)}")
                 encoded_term = urllib.parse.quote_plus(term)
-                if "?" in base_url_template:
-                     scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&q={encoded_term}"
-                else:
-                     scrape_url = f"{base_url_template}?q={encoded_term}"
-                scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
+            
+
+
+                if mode == 'General Search':
+                    if "?" in base_url_template:
+                        scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&q={encoded_term}"
+                    else:
+                        scrape_url = f"{base_url_template}?q={encoded_term}"
+                    scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
+                elif mode == "Page Search":
+                    if "?" in base_url_template:
+                        scrape_url = f"{base_url_template.split('?')[0]}?{base_url_template.split('?')[1]}&view_all_page_idq={encoded_term}"
+                    else:
+                        scrape_url = f"{base_url_template}?view_all_page_id={encoded_term}"
+                    scrape_url = scrape_url.replace("?&", "?").replace("&&", "&").replace("= ", "=")
+
+
+
 
                 with st.spinner(f"Scraping '{term}'..."):
                     scraped_df, log_messages = scrape_facebook_ads(
