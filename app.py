@@ -756,7 +756,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                     st.subheader(" Gemini Analysis Results")
                     gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
                     #st.text(gemini_res) 
-    
+                    with st.expander("Gemini Results:"):
+                        st.text(gemini_res)
                     gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
     
     
