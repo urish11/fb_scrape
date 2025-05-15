@@ -903,7 +903,7 @@ if 'final_merged_df' in st.session_state :
 
                         content = get_html_content(row['max_url'])
                         # st.text(content)
-                        prompt = """write as html using only  <a>, <p>, <h2>–<h4>, <li>, <ul>, <img>.\n
+                        prompt = """write as html using only  <a>, <p>, <h2>–<h4>, <li>, <ul>, <img>.\nNEVER use <br> or <br\> or <ol> or <ol\> NEVER!
                         only the article content no footers no images!! no images! no writer name!, no <div>!!! first element is ALWAYS <p>. NEVER write\return the domain name ( like xxx.com) in the title or html , omit that!! return in language same as input . return json dict, 2 keys : 'title', 'html'  . \n example :{"title" : "Learn more about how veterans ...", 'html' :"full article w/o title with html tags..'}  no <div>\n\n""" + content
                         gemini_res =gemini_text_lib(prompt=prompt, model='gemini-2.0-flash-exp' ) # gemini-2.0-flash-exp
                         # st.text(gemini_res)
