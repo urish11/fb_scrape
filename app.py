@@ -744,6 +744,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 I will provide the how many times the text occurred for you and the indices
                 Each "idea" value should be 2-5 words specific
                 the idea column texts needs to be a simple concise terms\keyword, no special characters like ( ) & / , etc 
+                RETURN ONLY THE JSON NO INTROS OR ANYTHING ELSE!
                 table:
                 {df_counts.to_string()}"""
             
