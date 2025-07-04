@@ -558,7 +558,7 @@ col1, col2 = st.columns(2)
 with col1:
     scroll_pause = st.slider("Scroll Pause Time (seconds):", min_value=1, max_value=20, value=2, help="Base time between scrolls.")
 with col2:
-     max_scrolls = st.slider("Max Scroll Attempts:", min_value=0, max_value=75, value=40, help="Max scrolls per term.")
+     max_scrolls = st.slider("Max Scroll Attempts:", min_value=0, max_value=75, value=15, help="Max scrolls per term.")
 
 
 # --- Scrape Button and Logic ---
