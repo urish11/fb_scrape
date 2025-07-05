@@ -69,7 +69,7 @@ def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # U
             response = client.models.generate_content(
                 model=model, contents=  prompt
             )
-            st.text(str(response))
+            # st.text(str(response))
     
             return response.text
         except Exception as e:
