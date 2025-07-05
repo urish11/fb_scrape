@@ -575,6 +575,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
         else:
             st.info(f"Preparing to scrape for {len(search_terms)} terms...")
             all_results_dfs = []
+            count_total=0
             all_log_messages = []
             overall_start_time = time.time()
             overall_status_placeholder = st.empty()
@@ -582,7 +583,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             # --- [Identical scraping loop as before] ---
             for i, term in enumerate(search_terms):
                 term_start_time = time.time()
-                overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'... total scraped : {len(all_results_dfs)}")
+                overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'... total scraped : {count_total)}")
                 encoded_term = urllib.parse.quote_plus(term)
             
 
@@ -614,6 +615,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
                     if not scraped_df.empty:
                          # Append even if empty, filtering happens after concat
                         all_results_dfs.append(scraped_df)
+                        count_total += len(scraped_df)
                     # Don't display success message per term here, do it after combining/filtering
                 else:
                     st.error(f"Scraping failed for term '{term}' after {term_duration:.2f}s.")
