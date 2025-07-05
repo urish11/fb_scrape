@@ -583,7 +583,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
             # --- [Identical scraping loop as before] ---
             for i, term in enumerate(search_terms):
                 term_start_time = time.time()
-                overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'... total scraped : {count_total)}")
+                overall_status_placeholder.info(f"Processing term {i+1}/{len(search_terms)}: '{term}'... total scraped : {count_total}")
                 encoded_term = urllib.parse.quote_plus(term)
             
 
