@@ -696,7 +696,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             df_to_process  = df_to_process[df_to_process["Text"].str.len() <= 500]
 
             tokens =count_string_tokens(prompt = "\n".join(list(df_to_process["Text"])),model="gemini-2.0-flash-001	")
-            chunks_num = tokens//60000 + 1  
+            chunks_num = tokens//60000 + 1
+            chunks_num = tokens//100000 + 1
+            
             df_appends = []
             max_rows = 3500
             dfs_splits = np.array_split(df_to_process,chunks_num)
@@ -794,7 +796,14 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                                                              None)
 
 
+                        keys_to_try=['terms','t'] 
+                        parsed_url = urlparse(max_seen_url)
+                        params = parse_qs(parsed_url.query)
+                        
+                        terms = ''.join([val for key in keys_to_try if key in params for val in params[key]])
 
+                        
+                        
                         # for idx in list(indices): #url:times
                         #     landing_page = df_chunk.iloc[idx]["Landing_Page"]
                         #     if landing_page in hash_urls:
@@ -837,12 +846,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "selected" : False,
                             "idea": idea,
                             "lang": lang,
-
                             "len": inx_len,
-                            "images": images,
-                            "max_url": max_seen_url,
                             "max_text": max_seen_text,
+                            "max_url": max_seen_url,
                             "max_seen_url_title" :max_seen_url_title,
+                            "terms" : terms,
+                            "images": images,
                             "img1": img1,
                             "img2": img2,
                             "img3": img3,
