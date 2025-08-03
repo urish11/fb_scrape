@@ -11,3 +11,4 @@ langdetect
 tokencost
 imagehash
 pillow
+opencv-python
