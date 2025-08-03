@@ -15,21 +15,22 @@ from datetime import datetime
 import traceback
 import io
 from PIL import Image
+import cv2
 import asyncio
 import aiohttp
 import urllib.parse
 import os
 import random # Added import
-from google import genai
+from google import genai 
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
 from langdetect import detect
 import numpy as np
 from tokencost import count_string_tokens
 import imagehash
-
+from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
-
+ 
 # --- Gemini Import and Configuration ---
 try:
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
@@ -64,10 +65,13 @@ def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # U
     
         client = genai.Client(api_key=selected_key)
     
-    
+        config =types.GenerationConfig(temperature=0.7)
+        
+        
         try:
             response = client.models.generate_content(
                 model=model, contents=  prompt
+                
             )
             # st.text(str(response))
     
@@ -79,33 +83,96 @@ def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # U
     
     return None
 
-def get_top_3_images_hash(img_list):
+def get_top_3_media_hashes(media_list):
+    """
+    Processes media to find the top 3 most common perceptual hashes.
+    For videos, it only analyzes the very first frame.
 
+    Args:
+        media_list (list): A list of strings, where each string is an image URL,
+                           a video URL, or a local path to a video file.
 
+    Returns:
+        list: A list of tuples, sorted by frequency, containing the top 3
+              hashes and their associated data.
+    """
     hashes_map = {}
-    for image_url in img_list:
-        # try:
-            if '60x60' not in image_url:
-                # st.text(f"Processing image URL: {image_url}")
-                image_res = requests.get(image_url)
-                image_res.raise_for_status()  
 
-                img = Image.open(io.BytesIO(image_res.content))
-                hash = imagehash.phash(img)
-                if str(hash) not in hashes_map.keys():
-                    hashes_map[str(hash)] = None
-                    hashes_map[str(hash)] = {'count':1 , 'data' : [image_url]}
-                elif str(hash) in hashes_map.keys():
-                    hashes_map[str(hash)]['data'] = hashes_map[str(hash)]['data'] + [image_url]
-                    hashes_map[str(hash)]['count'] += 1
+    def add_hash(img, source_identifier):
+        """Helper function to compute hash and update the map."""
+        try:
+            h = imagehash.phash(img)
+            hash_str = str(h)
+            entry = hashes_map.get(hash_str, {'count': 0, 'data': []})
+            entry['count'] += 1
+            entry['data'].append(source_identifier)
+            hashes_map[hash_str] = entry
+        except Exception as e:
+            print(f"Could not hash media from {source_identifier}: {e}")
 
-        # except Exception as e:
-        #     print(f'get_top_3_images_hash failed  : {e}')
-    # most_common_hash =max(hashes_map, key= lambda k: k[1]['count'], reversed=True)[:3]
-    # st.text(f"hashes_map : {hashes_map}")
-    top3_most_common_hash = sorted(hashes_map.items(), key = lambda k :k[1]['count'] , reverse= True)[:3]
-    # st.text(top3_most_common_hash)
-    return top3_most_common_hash
+    def process_video_stream(video_source):
+        """
+        Helper to process a video stream by hashing only its first frame.
+        """
+        try:
+            cap = cv2.VideoCapture(video_source)
+            if not cap.isOpened():
+                print(f"Error opening video stream: {video_source}")
+                return
+
+            # ✨ Read only the first frame of the video
+            ret, frame = cap.read()
+
+            # If the frame was read successfully, process it
+            if ret:
+                source_name = os.path.basename(urlparse(video_source).path) if isinstance(video_source, str) and video_source.startswith('http') else os.path.basename(video_source)
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                img = Image.fromarray(rgb_frame)
+                add_hash(img, video_source)
+            
+            # Clean up immediately
+            cap.release()
+
+        except Exception as e:
+            print(f"Failed to process video {video_source}: {e}")
+
+    for item in media_list:
+        # --- Handle URLs (Image or Video) ---
+        if item.startswith(('http://', 'https://')):
+            try:
+                head_res = requests.head(item, timeout=10, allow_redirects=True)
+                head_res.raise_for_status()
+                content_type = head_res.headers.get('Content-Type', '').lower()
+
+                if 'image' in content_type:
+                    res = requests.get(item, timeout=20)
+                    res.raise_for_status()
+                    img = Image.open(io.BytesIO(res.content))
+                    add_hash(img, item)
+                
+                elif 'video' in content_type:
+                    process_video_stream(item)
+                
+                else:
+                    print(f"Skipping unsupported URL content type '{content_type}' for: {item}")
+            except requests.exceptions.RequestException as e:
+                print(f"Failed to access URL {item}: {e}")
+
+        # --- Handle Local Files ---
+        elif os.path.exists(item):
+            process_video_stream(item)
+
+        else:
+            print(f"Skipping invalid item (not a URL or existing file): {item}")
+
+    # Sort and return the top 3
+    top3_most_common = sorted(
+        hashes_map.items(),
+        key=lambda k: k[1]['count'],
+        reverse=True
+    )[:3]
+    return top3_most_common
+
 
 
 
@@ -326,18 +393,19 @@ def scrape_facebook_ads(url, search_term, scroll_pause_time=5, max_scrolls=50):
                      img_elem = ad_block.select_one(selector)
                      if img_elem and img_elem.has_attr('src'):
                          src = img_elem['src']
-                         if 'data:image' not in src and '/emoji.php/' not in src and 'static.xx.fbcdn.net/rsrc.php' not in src:
+                         if 'data:image' not in src and '/emoji.php/' not in src and 'static.xx.fbcdn.net/rsrc.php' not in src and "s60x60" not in src:
                              media_url = src
                              break
                 # Look for video posters if no image found
-                if media_url == "Not Found":
+                if media_url == "Not Found" or 1==1:
                     video_selectors = [
                         'video.x1lliihq', 'video.xvbhtw8', 'video[poster]'
                     ]
                     for selector in video_selectors:
                          vid_elem = ad_block.select_one(selector)
-                         if vid_elem and vid_elem.has_attr('poster'):
-                            media_url = vid_elem['poster']
+                        #  st.text(vid_elem)
+                         if vid_elem and vid_elem.has_attr('src'):
+                            media_url = vid_elem['src']
                             break
 
 
@@ -696,8 +764,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
             df_to_process  = df_to_process[df_to_process["Text"].str.len() <= 500]
 
             tokens =count_string_tokens(prompt = "\n".join(list(df_to_process["Text"])),model="gemini-2.0-flash-001	")
-            chunks_num = tokens//60000 + 1
-            # chunks_num = tokens//100000 + 1
+            # chunks_num = tokens//60000 + 1
+            chunks_num = tokens//140000 + 1
             
             df_appends = []
             max_rows = 3500
@@ -743,74 +811,90 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                 #         """
                 
-    
+                df_for_gemini = df_counts["Text"]
+                pd.set_option('display.max_colwidth', -1)
+                df_for_gemini.name ='Index'
                 gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages, show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
                 I will provide the how many times the text occurred for you and the indices
                 Each "idea" value should be 3-6 words include semi specific important keywords
                 the idea column texts needs to be a simple concise terms\keyword, no special characters like ( ) & / , etc 
                 RETURN ONLY THE JSON NO INTROS OR ANYTHING ELSE!
                 table:
-                {df_counts.to_string()}"""
+                {df_for_gemini.to_string()}"""
             
                 st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
-                    with st.expander("Prompt:"):
-                        st.text(gemini_prompt)
-                    gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-flash") # Use the dedicated function gemini-2.5-pro-exp-03-25 
-            
-                if gemini_res:
-                    # st.text(gemini_res) 
+                    for trial in range(3):
+                        try:
+                            with st.expander("Prompt:"):
+                                st.text(gemini_prompt)
+                            gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-flash") # Use the dedicated function gemini-2.5-pro-exp-03-25 
+                    
+                            if gemini_res:
+                                # st.text(gemini_res) 
 
-                    final_df = pd.DataFrame()
-                    st.subheader(" Gemini Analysis Results")
-                    gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
-                    #st.text(gemini_res) 
-                    # with st.expander("Gemini Results:")::
-                    with st.expander("Gemini Completion"):
-                        st.text(gemini_res)
-                    gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
-    
+                                final_df = pd.DataFrame()
+                                st.subheader(" Gemini Analysis Results")
+                                gemini_res =gemini_res.replace("```json", '').replace("```", '') # Clean up the response
+                                #st.text(gemini_res) 
+                                # with st.expander("Gemini Results:")::
+                                with st.expander("Gemini Completion"):
+                                    st.text(gemini_res)
+                                gemini_df = pd.read_json(gemini_res) # Convert to DataFrame
+                                break
+                        except Exception as e:
+                            st.text(f"Failed  gemini_df trial :{str(trial)}")
+        
     
     
                     for index, row in gemini_df.iterrows():
                         idea = row['idea']
         
                         indices = row['indices']
+                        indices = [i for idx in indices for i in df_counts.iloc[idx]['Indices']]
+
+                        # st.text(f"df_counts {df_counts.to_string()}")
+                        # st.text(f"indices {str(indices)}")
                         inx_len = len(list(indices))
                         hash_urls={}
 
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
-                        url_title_map = asyncio.run(fetch_all_titles(urls))
-                        # st.text(url_title_map)
                         
-                        count_map ={}
+                        
+                        # url_title_map = asyncio.run(fetch_all_titles(urls))
+                        
+                        
+                        # count_map ={}
 
-                        for elem in url_title_map:
-                            title = elem[1]
-                            if title not in count_map.keys():
-                                count_map[title] = 1
+                        # for elem in url_title_map:
+                        #    title = elem[1]
+                        #    if title not in count_map.keys():
+                        #        count_map[title] = 1
+                        #    else:
+                        #        count_map[title] += 1
+                        # max_seen_url_title = max(count_map, key=count_map.get)
+                        # max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_url_title),
+                        #                                     None)
+                        max_seen_url_title = ''
+                        # max_seen_url = ''
+
+
+
+                        
+                        
+                        for idx in list(indices): #url:times
+                            landing_page = df_chunk.iloc[idx]["Landing_Page"]
+                            if landing_page in hash_urls:
+                                hash_urls[landing_page] += 1
                             else:
-                                count_map[title] += 1
-                        max_seen_url_title = max(count_map, key=count_map.get)
-                        max_seen_url =  max_seen_url = next((url for url, title in url_title_map if title == max_seen_url_title),
-                                                             None)
-
+                                hash_urls[landing_page] = 1
+                        max_seen_url = max(hash_urls, key=hash_urls.get)
 
                         keys_to_try=['terms','t'] 
                         parsed_url = urlparse(max_seen_url)
                         params = parse_qs(parsed_url.query)
                         
                         terms = ''.join([val for key in keys_to_try if key in params for val in params[key]])
-
-                        
-                        
-                        # for idx in list(indices): #url:times
-                        #     landing_page = df_chunk.iloc[idx]["Landing_Page"]
-                        #     if landing_page in hash_urls:
-                        #         hash_urls[landing_page] += 1
-                        #     else:
-                        #         hash_urls[landing_page] = 1
-                        # max_seen_url = max(hash_urls, key=hash_urls.get)
                         
                         text_urls = {}
                         for idx in list(indices): #text:times
@@ -824,7 +908,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
                         matching_rows = df_chunk.iloc[indices]
                         try:
-                            most_common_hash = get_top_3_images_hash(matching_rows['Media_URL'].tolist())
+                            most_common_hash = get_top_3_media_hashes(matching_rows['Media_URL'].tolist())
                             most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
                             images = "|".join(most_common_img_urls)
 
@@ -860,9 +944,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                         df_appends.append(row_df)
 
-                else:
-                    # Error message already displayed within gemini_text_lib
-                    st.error("Gemini processing failed or returned no result.")
+                    else:
+                        # Error message already displayed within gemini_text_lib
+                        st.error("Gemini processing failed or returned no result.")
         else:
             st.error("Could not find 'Text' column in the scraped data. Cannot analyze.")
     else:
