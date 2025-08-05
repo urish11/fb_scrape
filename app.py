@@ -33,7 +33,6 @@ st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 # temp_st=st.secrets
 try:
-    st.text(not (os.environ['HOSTNAME'] == 'streamlit'))
     if  not (os.environ['HOSTNAME'] == 'streamlit') : 
         st.secrets = dict(os.environ)
 except:st.secrets=temp_st
