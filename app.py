@@ -33,6 +33,7 @@ st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 temp_st=st.secrets
 try:
+    st.text(os.environ)
     if 'IMGBB_API_KEY' in os.environ : 
         st.secrets = dict(os.environ)
 except:st.secrets=temp_st
