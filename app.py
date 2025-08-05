@@ -31,9 +31,10 @@ from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
+temp_st=st.secrets
 try:
     st.secrets = dict(os.environ)
-except:pass
+except:st.secrets=temp_st
 
 
 # --- Gemini Import and Configuration ---
