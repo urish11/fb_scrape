@@ -31,7 +31,7 @@ from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
-temp_st=st.secrets
+# temp_st=st.secrets
 try:
     st.text(not (os.environ['HOSTNAME'] == 'streamlit'))
     if  not (os.environ['HOSTNAME'] == 'streamlit') : 
