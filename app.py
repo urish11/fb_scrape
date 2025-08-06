@@ -30,14 +30,7 @@ import imagehash
 from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
-
-# temp_st=st.secrets
-try:
-    if  not (os.environ['HOSTNAME'] == 'streamlit') : 
-        st.secrets = dict(os.environ)
-except:st.secrets=temp_st
-
-
+ 
 # --- Gemini Import and Configuration ---
 try:
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
@@ -119,35 +112,75 @@ def get_top_3_media_hashes(media_list):
 
     def process_video_stream(video_source):
         """
-        Helper to process a video stream by hashing only its first frame.
+        Downloads the video (if it's a URL), and hashes the first frame.
         """
         try:
-            cap = cv2.VideoCapture(video_source)
+            local_path = None
+
+            if isinstance(video_source, str) and video_source.startswith("http"):
+                # Download video to temp file with headers
+                headers = {
+                    'User-Agent': (
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                        'AppleWebKit/537.36 (KHTML, like Gecko) '
+                        'Chrome/115.0.0.0 Safari/537.36'
+                    ),
+                    'Referer': 'https://www.facebook.com/',
+                }
+
+                res = requests.get(video_source, headers=headers, stream=True, timeout=30)
+                res.raise_for_status()
+
+                # Save to temporary file
+                local_path = f"_tmp_q.mp4"
+                with open(local_path, 'wb') as f:
+                    for chunk in res.iter_content(chunk_size=8192):
+                        f.write(chunk)
+            else:
+                local_path = video_source
+
+            # Now open locally
+            cap = cv2.VideoCapture(local_path)
             if not cap.isOpened():
-                print(f"Error opening video stream: {video_source}")
+                print(f"Error opening video: {video_source}")
                 return
 
-            # ✨ Read only the first frame of the video
             ret, frame = cap.read()
-
-            # If the frame was read successfully, process it
             if ret:
-                source_name = os.path.basename(urlparse(video_source).path) if isinstance(video_source, str) and video_source.startswith('http') else os.path.basename(video_source)
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = Image.fromarray(rgb_frame)
                 add_hash(img, video_source)
-            
-            # Clean up immediately
+            else:
+                print(f"Failed to read frame from {video_source}")
+
             cap.release()
+
+            # Clean up if we downloaded
+            if video_source.startswith("http") and os.path.exists(local_path):
+                os.remove(local_path)
 
         except Exception as e:
             print(f"Failed to process video {video_source}: {e}")
+
 
     for item in media_list:
         # --- Handle URLs (Image or Video) ---
         if item.startswith(('http://', 'https://')):
             try:
-                head_res = requests.head(item, timeout=10, allow_redirects=True)
+                headers = {
+                    'User-Agent': (
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                        'AppleWebKit/537.36 (KHTML, like Gecko) '
+                        'Chrome/115.0.0.0 Safari/537.36'
+                    ),
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://www.facebook.com/',
+                    'Connection': 'keep-alive'
+}
+
+
+                head_res = requests.head(item, timeout=11, allow_redirects=True,headers=headers)
                 head_res.raise_for_status()
                 content_type = head_res.headers.get('Content-Type', '').lower()
 
@@ -862,7 +895,9 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
 
                         # st.text(f"df_counts {df_counts.to_string()}")
                         # st.text(f"indices {str(indices)}")
-                        inx_len = len(list(indices))
+                        #st.text(f" {idea} indices {indices}")
+                        inx_len = sum([df_chunk.iloc[idx]["Count"] for idx in indices])
+                        #inx_len = len(list(indices))
                         hash_urls={}
 
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
