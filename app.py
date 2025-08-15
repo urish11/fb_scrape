@@ -961,7 +961,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                                padded_urls = (list(most_common_img_urls or []) + [None] * 3)[:3]
                             else:
                                 images = "|".join(matching_rows['Media_URL'].tolist()[0:2])
-                                padded_urls = (list(images or []) + [None] * 3)[:3]
+                                padded_urls = (matching_rows['Media_URL'].tolist() + [None] * 3)[:3]
 
                         except Exception as e:
                             print(f"Error processing most_common_img_urls: {e}")
