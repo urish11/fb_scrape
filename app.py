@@ -220,6 +220,9 @@ def get_top_3_media_hashes(media_list):
 # --- Initialize Session State ---
 if 'combined_df' not in st.session_state:
     st.session_state.combined_df = None # Initialize as None
+if 'final_merged_df' not in st.session_state:
+    st.session_state.final_merged_df = None
+
 
 # --- Scraping Function (scrape_facebook_ads) ---
 # [NO CHANGES NEEDED TO THE scrape_facebook_ads function itself from the previous version]
@@ -1004,7 +1007,7 @@ elif GEMINI_API_KEYS is None:
 
 
 
-if 'final_merged_df' in st.session_state :
+if st.session_state['final_merged_df'] is not None  :
     # df = pd.concat(df_appends)
     # df["selected"] = False  # Ensure column exists
     # st.session_state['final_merged_df'] = df
