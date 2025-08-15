@@ -938,7 +938,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         keys_to_try=['terms','t'] 
                         parsed_url = urlparse(max_seen_url)
                         params = parse_qs(parsed_url.query)
-                        domain = str(parsed_url.hostname)
+                        domain = str(parsed_url.hostname).replace("www.","")
                         
                         terms = ''.join([val for key in keys_to_try if key in params for val in params[key]])
                         
