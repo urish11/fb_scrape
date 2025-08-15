@@ -938,6 +938,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         keys_to_try=['terms','t'] 
                         parsed_url = urlparse(max_seen_url)
                         params = parse_qs(parsed_url.query)
+                        domain = str(parsed_url.hostname)
                         
                         terms = ''.join([val for key in keys_to_try if key in params for val in params[key]])
                         
@@ -978,13 +979,14 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "len": inx_len,
                             "max_text": max_seen_text,
                             "max_url": max_seen_url,
-                            "max_seen_url_title" :max_seen_url_title,
+                            # "max_seen_url_title" :max_seen_url_title,
                             "terms" : terms,
                             "images": images,
                             "img1": img1,
                             "img2": img2,
                             "img3": img3,
-                            "indices": indices,                            
+                            "indices": indices, 
+                            "domain" : domain
                         }])
 
                         df_appends.append(row_df)
