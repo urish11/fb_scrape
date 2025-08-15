@@ -661,7 +661,7 @@ search_terms_input = st.text_area(
     help="Each line is a separate search query."
 )
 auto_gemini = st.checkbox("Auto Gemini Analyze?", value=False)
-
+hash_imgs = st.checkbox("Analyze images and vid hash?", value=True)
 
 st.info("ℹ️ WebDriver configured for Streamlit Cloud.", icon="☁️")
 
@@ -954,9 +954,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
     
                         matching_rows = df_chunk.iloc[indices]
                         try:
-                            most_common_hash = get_top_3_media_hashes(matching_rows['Media_URL'].tolist())
-                            most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
-                            images = "|".join(most_common_img_urls)
+                            if hash_imgs:
+                               most_common_hash = get_top_3_media_hashes(matching_rows['Media_URL'].tolist())
+                               most_common_img_urls= [elem[1]['data'][0] for elem in most_common_hash]
+                               images = "|".join(most_common_img_urls)
+                            else:
+                                images = "|".join(matching_rows['Media_URL'].tolist()[0:2])
 
                         except Exception as e:
                             print(f"Error processing most_common_img_urls: {e}")
