@@ -992,7 +992,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "img3": img3,
                             "indices": indices, 
                             "domain" : domain,
-                            "texts": 
+                            "texts":  texts
                         }])
 
                         df_appends.append(row_df)
