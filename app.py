@@ -904,7 +904,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         hash_urls={}
 
                         urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
-                        
+                        texts = "\n".join([df_chunk.iloc[idx]["Text"] for idx in indices])
                         
                         # url_title_map = asyncio.run(fetch_all_titles(urls))
                         
@@ -991,7 +991,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                             "img2": img2,
                             "img3": img3,
                             "indices": indices, 
-                            "domain" : domain
+                            "domain" : domain,
+                            "texts": 
                         }])
 
                         df_appends.append(row_df)
