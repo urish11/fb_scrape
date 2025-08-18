@@ -657,7 +657,7 @@ if mode == 'Page Search':
 
 search_terms_input = st.text_area(
     "Enter Search Terms\Page IDs (one per line):",
-    height=150,
+    height=350,
     help="Each line is a separate search query."
 )
 auto_gemini = st.checkbox("Auto Gemini Analyze?", value=False)
