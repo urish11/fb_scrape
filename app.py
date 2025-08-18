@@ -680,7 +680,7 @@ if st.button("🚀 Scrape All Terms in Cloud", type="primary"):
     elif not search_terms_input:
         st.error("Please enter at least one search term.")
     else:
-        search_terms = list(set([term.strip() for term in search_terms_input.splitlines() if term.strip()]))
+        search_terms = list(dict.fromkeys(term.strip() for term in search_terms_input.splitlines() if term.strip()))
         if not search_terms:
              st.error("No valid search terms found.")
         else:
