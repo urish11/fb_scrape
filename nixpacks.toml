@@ -11,8 +11,8 @@ nixPkgs = [
 ]
 
 [phases.install]
-# Make sure Python deps are installed
-cmds = ["pip install -r requirements.txt"]
+# Call pip from the venv path Nixpacks sets up
+cmds = ["/opt/venv/bin/pip install -r requirements.txt"]
 
 [start]
-cmd = "streamlit run app.py --server.port $PORT --server.address 0.0.0.0"
+cmd = "/opt/venv/bin/streamlit run app.py --server.port $PORT --server.address 0.0.0.0"
