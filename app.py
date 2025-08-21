@@ -30,7 +30,10 @@ import imagehash
 from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
- 
+
+if not st.secrets:  # if empty (e.g. on Railway)
+    st.secrets = os.environ
+
 # --- Gemini Import and Configuration ---
 try:
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
