@@ -30,9 +30,27 @@ import imagehash
 from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
+try:
+    _ = dict(st.secrets)  # triggers parsing; raises if no secrets.toml
+except Exception:
+    class _EnvProxy(dict):
+        def __getitem__(self, k):
+            v = os.environ.get(k)
+            if v is None:
+                raise KeyError(k)
+            return v
+        def get(self, k, default=None):
+            return os.environ.get(k, default)
+        def keys(self):
+            return os.environ.keys()
+        def items(self):
+            return os.environ.items()
+        def __iter__(self):
+            return iter(os.environ)
+        def __len__(self):
+            return len(os.environ)
 
-if not st.secrets:  # if empty (e.g. on Railway)
-    st.secrets = os.environ
+    st.secrets = _EnvProxy()
 
 # --- Gemini Import and Configuration ---
 try:
