@@ -3,10 +3,10 @@
 [phases.setup]
 # Extra system dependencies to install
 nixPkgs = [
-  "chromium"
-  "chromedriver"
-  "ffmpeg"
-  "unzip"
+  "chromium",
+  "chromedriver",
+  "ffmpeg",
+  "unzip",
   "wget"
 ]
 
