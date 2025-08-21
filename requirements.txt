@@ -12,5 +12,3 @@ tokencost
 imagehash
 pillow
 opencv-python-headless
-chromium
-chromium-driver
