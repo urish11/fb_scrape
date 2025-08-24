@@ -892,7 +892,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         try:
                             with st.expander("Prompt:"):
                                 st.text(gemini_prompt)
-                            gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-flash") # Use the dedicated function gemini-2.5-pro-exp-03-25 
+                            gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-pro") # Use the dedicated function gemini-2.5-pro-exp-03-25 gemini-2.5-flash
                     
                             if gemini_res:
                                 # st.text(gemini_res) 
