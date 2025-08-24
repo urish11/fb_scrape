@@ -69,7 +69,6 @@ except Exception as e:
     st.error(f"Error initializing Gemini configuration: {e}")
     GEMINI_API_KEYS = None
 
-st.text(f"xxx {GEMINI_API_KEYS}")
 # --- Gemini Function ---
 def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # Using a stable model  
     tries = 0
