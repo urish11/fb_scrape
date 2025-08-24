@@ -51,7 +51,7 @@ except Exception:
             return len(os.environ)
 
     st.secrets = _EnvProxy()
-
+st.text(st.secrets)
 # --- Gemini Import and Configuration ---
 try:
     # Get API keys from secrets - assumes it's a comma-separated string or a single key
@@ -60,6 +60,7 @@ try:
         GEMINI_API_KEYS = api_keys_str
         GEMINI_API_KEYS = api_keys_str.replace('"',"'")
         GEMINI_API_KEYS = json.loads(GEMINI_API_KEYS)
+        st.text(GEMINI_API_KEYS)
       
 
     else:
