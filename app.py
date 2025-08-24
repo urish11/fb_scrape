@@ -48,7 +48,6 @@ if api_keys_str:
         # Support either a JSON array of keys or a single key string
         parsed = json.loads(str(api_keys_str))
         GEMINI_API_KEYS = parsed if isinstance(parsed, list) else [parsed]
-        st.text(GEMINI_API_KEYS)
     except json.JSONDecodeError:
         GEMINI_API_KEYS = [api_keys_str]
 else:
