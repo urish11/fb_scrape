@@ -46,7 +46,7 @@ api_keys_str = get_secret("GEMINI_API_KEY", "")
 if api_keys_str:
     try:
         # Support either a JSON array of keys or a single key string
-        parsed = json.loads(api_keys_str)
+        parsed = json.loads(str(api_keys_str))
         GEMINI_API_KEYS = parsed if isinstance(parsed, list) else [parsed]
         st.text(GEMINI_API_KEYS)
     except json.JSONDecodeError:
