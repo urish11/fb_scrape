@@ -58,6 +58,8 @@ try:
     api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
     if api_keys_str:
         GEMINI_API_KEYS = api_keys_str
+        GEMINI_API_KEYS = api_keys_str.replace('"',"'")
+        GEMINI_API_KEYS = json.loads(GEMINI_API_KEYS)
       
 
     else:
