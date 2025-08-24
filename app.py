@@ -30,46 +30,32 @@ import imagehash
 from google.genai import types
 
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
-try:
-    _ = dict(st.secrets)  # triggers parsing; raises if no secrets.toml
-except Exception:
-    class _EnvProxy(dict):
-        def __getitem__(self, k):
-            v = os.environ.get(k)
-            if v is None:
-                raise KeyError(k)
-            return v
-        def get(self, k, default=None):
-            return os.environ.get(k, default)
-        def keys(self):
-            return os.environ.keys()
-        def items(self):
-            return os.environ.items()
-        def __iter__(self):
-            return iter(os.environ)
-        def __len__(self):
-            return len(os.environ)
 
-    st.secrets = _EnvProxy()
-st.text(st.secrets)
+
+def get_secret(key: str, default=None):
+    """Fetch a secret from Streamlit or fall back to environment variables."""
+    try:
+        return st.secrets[key]
+    except Exception:
+        return os.environ.get(key, default)
+
+
 # --- Gemini Import and Configuration ---
-try:
-    # Get API keys from secrets - assumes it's a comma-separated string or a single key
-    api_keys_str = st.secrets.get("GEMINI_API_KEY", "")
-    if api_keys_str:
-        GEMINI_API_KEYS = api_keys_str
-        GEMINI_API_KEYS = api_keys_str.replace('"',"'")
-        GEMINI_API_KEYS = json.loads(GEMINI_API_KEYS)
+api_keys_str = get_secret("GEMINI_API_KEY", "")
+
+if api_keys_str:
+    try:
+        # Support either a JSON array of keys or a single key string
+        parsed = json.loads(str(api_keys_str))
+        GEMINI_API_KEYS = parsed if isinstance(parsed, list) else [parsed]
         st.text(GEMINI_API_KEYS)
-      
-
-    else:
-        st.warning("GEMINI_API_KEY not found in Streamlit secrets. Gemini functionality will be disabled.", icon="⚠️")
-        GEMINI_API_KEYS = None
-
-
-except Exception as e:
-    st.error(f"Error initializing Gemini configuration: {e}")
+    except json.JSONDecodeError:
+        GEMINI_API_KEYS = [api_keys_str]
+else:
+    st.warning(
+        "GEMINI_API_KEY not found in Streamlit secrets or environment. Gemini functionality will be disabled.",
+        icon="⚠️",
+    )
     GEMINI_API_KEYS = None
 
 # --- Gemini Function ---
