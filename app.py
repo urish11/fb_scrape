@@ -69,7 +69,6 @@ except Exception as e:
     st.error(f"Error initializing Gemini configuration: {e}")
     GEMINI_API_KEYS = None
 
-
 # --- Gemini Function ---
 def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # Using a stable model  
     tries = 0
@@ -842,7 +841,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 st.text(f"{df_idx} {len(df_chunk)}")
                 # st.text("\n".join(list(df_chunk["Text"])))
                 
-                df_chunk = df_chunk.reset_index(drop=True)
+                #df_chunk = df_chunk.reset_index(drop=True)
                 df_to_process_text  = pd.DataFrame(df_chunk[["Text","Count"]], columns = ["Text","Count"])
                 df_to_process_text  = df_to_process_text[df_to_process_text["Text"].str.len() <= 500]
                 df_to_process_text['Count'] = pd.to_numeric(df_to_process_text['Count'], errors='coerce')
@@ -858,6 +857,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 # st.text(df_counts.to_string())
                 st.markdown(f"Proccessing {df_idx+1} df...")
                 st.dataframe(df_counts)
+                
+                
                 # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
                 
@@ -878,7 +879,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_for_gemini = df_counts["Text"]
                 pd.set_option('display.max_colwidth', None)
                 df_for_gemini.name ='Index'
-                gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages AND  dont mix  simillar but diff topics (New CX-5 ... , Jeep models... are not the same topic!), show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
+                gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages (meaning if a topic is in different languages -> different "idea" row ,ALSO  dont mix  simillar but diff topics (New CX-5 ... , Jeep models... are not the same topic!), show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
                 I will provide the how many times the text occurred for you and the indices
                 Each "idea" value should be 3-6 words include semi specific important keywords
                 the idea column texts needs to be a simple concise terms\keyword, no special characters like ( ) & / , etc 
@@ -892,7 +893,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         try:
                             with st.expander("Prompt:"):
                                 st.text(gemini_prompt)
-                            gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-flash") # Use the dedicated function gemini-2.5-pro-exp-03-25 
+                            gemini_res = gemini_text_lib(gemini_prompt,model ="gemini-2.5-pro") # Use the dedicated function gemini-2.5-pro-exp-03-25 gemini-2.5-flash
                     
                             if gemini_res:
                                 # st.text(gemini_res) 
@@ -920,12 +921,12 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         # st.text(f"df_counts {df_counts.to_string()}")
                         # st.text(f"indices {str(indices)}")
                         #st.text(f" {idea} indices {indices}")
-                        inx_len = sum([df_chunk.iloc[idx]["Count"] for idx in indices])
+                        inx_len = sum([df_to_process.iloc[idx]["Count"] for idx in indices])
                         #inx_len = len(list(indices))
                         hash_urls={}
 
-                        urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
-                        texts = "\n".join(list(set([df_chunk.iloc[idx]["Text"] for idx in indices])))
+                        urls = [df_to_process.iloc[idx]["Landing_Page"] for idx in indices]
+                        texts = "\n".join(list(set([df_to_process.iloc[idx]["Text"] for idx in indices])))
                         
                         # url_title_map = asyncio.run(fetch_all_titles(urls))
                         
@@ -949,7 +950,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                         
                         for idx in list(indices): #url:times
-                            landing_page = df_chunk.iloc[idx]["Landing_Page"]
+                            landing_page = df_to_process.iloc[idx]["Landing_Page"]
                             if landing_page in hash_urls:
                                 hash_urls[landing_page] += 1
                             else:
@@ -965,7 +966,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                         text_urls = {}
                         for idx in list(indices): #text:times
-                            text = df_chunk.iloc[idx]["Text"]
+                            text = df_to_process.iloc[idx]["Text"]
                             if text in text_urls:
                                 text_urls[text] += 1
                             else:
@@ -973,7 +974,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         max_seen_text = max(text_urls, key=text_urls.get)
     
     
-                        matching_rows = df_chunk.iloc[indices]
+                        matching_rows = df_to_process.iloc[indices]
                         try:
                             if hash_imgs:
                                most_common_hash = get_top_3_media_hashes(matching_rows['Media_URL'].tolist())
