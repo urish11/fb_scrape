@@ -21,7 +21,8 @@ import aiohttp
 import urllib.parse
 import os
 import random # Added import
-from google import genai 
+import gc
+from google import genai
 from urllib.parse import urlparse, parse_qs, unquote # Import necessary functions
 from langdetect import detect
 import numpy as np
@@ -57,8 +58,28 @@ else:
     )
     GEMINI_API_KEYS = None
 
+# --- Memory Helpers ---
+def optimize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Downcast numeric types and convert low-cardinality objects to categoricals."""
+    for col in df.select_dtypes(include=["int", "float"]).columns:
+        df[col] = pd.to_numeric(df[col], downcast="unsigned")
+    for col in df.select_dtypes(include="object").columns:
+        unique_ratio = df[col].nunique() / max(len(df[col]), 1)
+        if unique_ratio < 0.5:
+            df[col] = df[col].astype("category")
+    return df
+
+
+def clear_session_state():
+    """Remove large DataFrames from session state and trigger garbage collection."""
+    keys_to_clear = ["combined_df", "final_merged_df", "final_merged_df_selected"]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+    gc.collect()
+
 # --- Gemini Function ---
-def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # Using a stable model  
+def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # Using a stable model
     tries = 0
     while tries < max_retries:
         
@@ -1014,9 +1035,10 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         st.error("No filtered data available to process. Please scrape data first.")
 
     
-    final_merged_df = pd.concat(df_appends)
-                    
+    final_merged_df = optimize_dataframe(pd.concat(df_appends))
     st.session_state['final_merged_df'] = final_merged_df
+    del df_appends
+    gc.collect()
 
 elif GEMINI_API_KEYS is None:
     st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
@@ -1093,3 +1115,7 @@ if st.session_state['final_merged_df'] is not None  :
 
 # --- Footer ---
 st.markdown("---")
+
+if st.button("Clear data & free memory"):
+    clear_session_state()
+    st.success("Session data cleared.")
