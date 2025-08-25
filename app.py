@@ -28,7 +28,7 @@ import numpy as np
 from tokencost import count_string_tokens
 import imagehash
 from google.genai import types
-
+import gc
 st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 
@@ -865,13 +865,15 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_for_gemini = df_counts["Text"]
                 pd.set_option('display.max_colwidth', None)
                 df_for_gemini.name ='Index'
+                text_for_prompt = '\n'.join(df_for_gemini.tolist())
+
                 gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages AND  dont mix  simillar but diff topics (New CX-5 ... , Jeep models... are not the same topic!), show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
                 I will provide the how many times the text occurred for you and the indices
                 Each "idea" value should be 3-6 words include semi specific important keywords
                 the idea column texts needs to be a simple concise terms\keyword, no special characters like ( ) & / , etc 
                 RETURN ONLY THE JSON NO INTROS OR ANYTHING ELSE!
                 table:
-                {df_for_gemini.to_string()}"""
+                {text_for_prompt}"""
             
                 st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
@@ -1014,13 +1016,23 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         st.error("No filtered data available to process. Please scrape data first.")
 
     
-    final_merged_df = pd.concat(df_appends)
-                    
-    st.session_state['final_merged_df'] = final_merged_df
-
-elif GEMINI_API_KEYS is None:
-    st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
-
+    if df_appends: # Check if any results were generated
+        final_merged_df = pd.concat(df_appends, ignore_index=True)
+        st.session_state['final_merged_df'] = final_merged_df
+    
+        # --- MEMORY OPTIMIZATION ---
+        # We are done with the initial large dataframe. Delete it.
+        st.text("Cleaning up initial scraped data from memory...")
+        if 'combined_df' in st.session_state:
+            del st.session_state.combined_df
+            st.session_state.combined_df = None # Set to None to avoid errors
+        
+        # Explicitly run the garbage collector to reclaim memory NOW.
+        gc.collect() 
+        st.text("Memory cleanup complete.")
+        
+    else:
+        st.error("Gemini processing resulted in an empty dataset.")
 
 
 if st.session_state['final_merged_df'] is not None  :
