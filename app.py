@@ -28,9 +28,8 @@ import numpy as np
 from tokencost import count_string_tokens
 import imagehash
 from google.genai import types
-import gc
-st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
+st.set_page_config(layout="wide",page_title= "FB Scrape", page_icon="🚀")
 
 def get_secret(key: str, default=None):
     """Fetch a secret from Streamlit or fall back to environment variables."""
@@ -48,15 +47,15 @@ if api_keys_str:
         # Support either a JSON array of keys or a single key string
         parsed = json.loads(str(api_keys_str))
         GEMINI_API_KEYS = parsed if isinstance(parsed, list) else [parsed]
+        
     except json.JSONDecodeError:
-        GEMINI_API_KEYS = [api_keys_str]
+        GEMINI_API_KEYS = api_keys_str
 else:
     st.warning(
         "GEMINI_API_KEY not found in Streamlit secrets or environment. Gemini functionality will be disabled.",
         icon="⚠️",
     )
     GEMINI_API_KEYS = None
-
 # --- Gemini Function ---
 def gemini_text_lib(prompt, model='gemini-2.5-pro-exp-03-25',max_retries=5): # Using a stable model  
     tries = 0
@@ -829,7 +828,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 st.text(f"{df_idx} {len(df_chunk)}")
                 # st.text("\n".join(list(df_chunk["Text"])))
                 
-                df_chunk = df_chunk.reset_index(drop=True)
+                #df_chunk = df_chunk.reset_index(drop=True)
                 df_to_process_text  = pd.DataFrame(df_chunk[["Text","Count"]], columns = ["Text","Count"])
                 df_to_process_text  = df_to_process_text[df_to_process_text["Text"].str.len() <= 500]
                 df_to_process_text['Count'] = pd.to_numeric(df_to_process_text['Count'], errors='coerce')
@@ -845,6 +844,8 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 # st.text(df_counts.to_string())
                 st.markdown(f"Proccessing {df_idx+1} df...")
                 st.dataframe(df_counts)
+                
+                
                 # st.text(df_counts.to_string())
                 # st.text("\n".join(list(df_counts)))
                 
@@ -865,15 +866,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                 df_for_gemini = df_counts["Text"]
                 pd.set_option('display.max_colwidth', None)
                 df_for_gemini.name ='Index'
-                text_for_prompt = '\n'.join(df_for_gemini.tolist())
-
-                gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages AND  dont mix  simillar but diff topics (New CX-5 ... , Jeep models... are not the same topic!), show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
+                gemini_prompt = """Please go over the following search arbitrage ideas table, deeply think about patterns and reoccurring. I want to get the ideas that would show the most potential. This data is scraped from competitors, so whatever reoccurs is probably successful.\nReturn a list of ideas txt new line delimited!      (no Analysis at all! )of the ideas (just the ideas consicly, no explaning, and not as given), descending order by potential like i described. \nanalyze EACH entry!  BE VERY thorough. be  specific in the topic. don't mix beteern languages (meaning if a topic is in different languages -> different "idea" row ,ALSO  dont mix  simillar but diff topics (New CX-5 ... , Jeep models... are not the same topic!), show them in differnet rows (but still just the ideas consicly , not original input) , return in original language. use the text in 'Text' col to understand the topic and merge simillar text about the similar ideas. then return the indices of the rows from input table per row of output table. return in json example : [{"idea" : "idea text..." , "indices" : [1,50]} , ....]""" + f"""
                 I will provide the how many times the text occurred for you and the indices
                 Each "idea" value should be 3-6 words include semi specific important keywords
                 the idea column texts needs to be a simple concise terms\keyword, no special characters like ( ) & / , etc 
                 RETURN ONLY THE JSON NO INTROS OR ANYTHING ELSE!
                 table:
-                {text_for_prompt}"""
+                {df_for_gemini.to_string()}"""
             
                 st.info(f"Sending  unique text samples to Gemini for analysis...")
                 with st.spinner("🧠 Processing with Gemini... This might take a moment."):
@@ -905,16 +904,17 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         
                         indices = row['indices']
                         indices = [i for idx in indices for i in df_counts.iloc[idx]['Indices']]
+                        st.text(f"indices : {indices} df_to_process len : {len(df_to_process)} " )
 
                         # st.text(f"df_counts {df_counts.to_string()}")
                         # st.text(f"indices {str(indices)}")
                         #st.text(f" {idea} indices {indices}")
-                        inx_len = sum([df_chunk.iloc[idx]["Count"] for idx in indices])
+                        inx_len = sum([df_to_process.loc[idx]["Count"] for idx in indices])
                         #inx_len = len(list(indices))
                         hash_urls={}
 
-                        urls = [df_chunk.iloc[idx]["Landing_Page"] for idx in indices]
-                        texts = "\n".join(list(set([df_chunk.iloc[idx]["Text"] for idx in indices])))
+                        urls = [df_to_process.loc[idx]["Landing_Page"] for idx in indices]
+                        texts = "\n".join(list(set([df_to_process.loc[idx]["Text"] for idx in indices])))
                         
                         # url_title_map = asyncio.run(fetch_all_titles(urls))
                         
@@ -938,7 +938,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                         
                         for idx in list(indices): #url:times
-                            landing_page = df_chunk.iloc[idx]["Landing_Page"]
+                            landing_page = df_to_process.loc[idx]["Landing_Page"]
                             if landing_page in hash_urls:
                                 hash_urls[landing_page] += 1
                             else:
@@ -954,7 +954,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         
                         text_urls = {}
                         for idx in list(indices): #text:times
-                            text = df_chunk.iloc[idx]["Text"]
+                            text = df_to_process.loc[idx]["Text"]
                             if text in text_urls:
                                 text_urls[text] += 1
                             else:
@@ -962,7 +962,7 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
                         max_seen_text = max(text_urls, key=text_urls.get)
     
     
-                        matching_rows = df_chunk.iloc[indices]
+                        matching_rows = df_to_process.loc[indices]
                         try:
                             if hash_imgs:
                                most_common_hash = get_top_3_media_hashes(matching_rows['Media_URL'].tolist())
@@ -1016,23 +1016,13 @@ if st.button("Process trends with Gemini?", key='gemini_button', disabled=(GEMIN
         st.error("No filtered data available to process. Please scrape data first.")
 
     
-    if df_appends: # Check if any results were generated
-        final_merged_df = pd.concat(df_appends, ignore_index=True)
-        st.session_state['final_merged_df'] = final_merged_df
-    
-        # --- MEMORY OPTIMIZATION ---
-        # We are done with the initial large dataframe. Delete it.
-        st.text("Cleaning up initial scraped data from memory...")
-        if 'combined_df' in st.session_state:
-            del st.session_state.combined_df
-            st.session_state.combined_df = None # Set to None to avoid errors
-        
-        # Explicitly run the garbage collector to reclaim memory NOW.
-        gc.collect() 
-        st.text("Memory cleanup complete.")
-        
-    else:
-        st.error("Gemini processing resulted in an empty dataset.")
+    final_merged_df = pd.concat(df_appends)
+                    
+    st.session_state['final_merged_df'] = final_merged_df
+
+elif GEMINI_API_KEYS is None:
+    st.warning("Gemini analysis disabled because GEMINI_API_KEY is not configured in secrets.", icon="🚫")
+
 
 
 if st.session_state['final_merged_df'] is not None  :
